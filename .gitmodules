@@ -62,3 +62,7 @@
 	path = zoo/thinnect.dev-platforms
 	url = https://github.com/thinnect/dev-platforms.git
 	branch = master
+[submodule "zoo/thinnect.hiot-platforms"]
+	path = zoo/thinnect.hiot-platforms
+	url = git@github.com:thinnect/hiot-platforms.git
+	branch = master

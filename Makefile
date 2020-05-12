@@ -65,7 +65,7 @@ SILABS_SDKDIR           ?= $(HOME)/SimplicityStudio_v4/developer/sdks/gecko_sdk_
 
 BUILD_DIR                = $(BUILD_BASE_DIR)/$(BUILD_TARGET)
 BUILDSYSTEM_DIR         := $(ZOO)/thinnect.node-buildsystem/make
-PLATFORMS_DIRS          := $(ZOO)/thinnect.node-buildsystem/make $(ZOO)/thinnect.dev-platforms/make
+PLATFORMS_DIRS          := $(ZOO)/thinnect.node-buildsystem/make $(ZOO)/thinnect.dev-platforms/make $(ZOO)/thinnect.hiot-platforms/make
 PHONY_GOALS             := all clean
 TARGETLESS_GOALS        += clean
 UUID_APPLICATION        := b765981d-fb13-4644-be61-6c4f77f7c109
