@@ -4,8 +4,8 @@ The Mist Example project demonstrates integration of the Thinnect mist
 middleware library and in the future the integration of the mesh network and
 security libraries.
 
-The integrated reference action module implements a basic luminaire control
-feature set. (*TODO* not functional currently).
+The integrated reference action modules implement basic luminaire control
+and motion detection features.
 
 # Mist subscriptions (rules)
 
