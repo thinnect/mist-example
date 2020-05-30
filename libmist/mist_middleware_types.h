@@ -4,7 +4,12 @@
 /**
  * Mist success-fail type. 0 for success.
  */
-typedef int mist_error_t;
+typedef enum mist_error
+{
+	MIST_FAIL = -1,
+	MIST_SUCCESS = 0
+}
+mist_error_t;
 
 /**
  * Local subscription id: 0 <= lid < SUBS_LOCALID_NONE
