@@ -23,7 +23,7 @@ static mist_module_t m_lighting_module;
 static mist_module_t m_movement_module;
 
 static int32_t m_light_output = -1; // Totally off
-static int32_t m_movement_count = -1; // No movement ever
+static int32_t m_movement_count = 0; // No movement yet
 
 static mist_error_t light_control(
             mist_item_type_t   itype, void * input,  uint16_t input_length,
@@ -90,6 +90,8 @@ static void movement_detector_simulation_thread(void * arg)
 		osDelay(1000);
 		if (PLATFORM_ButtonGet())
 		{
+			m_movement_count++;
+
 			mist_error_t r = mist_spontaneous_event(&m_movement_module,
 			                                        MIST_ITEM_INT32, &m_movement_count, sizeof(int32_t));
 			info1("movement");
