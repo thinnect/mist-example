@@ -84,6 +84,7 @@ NODE_PLATFORM_DIR       := $(ZOO)/thinnect.node-platform
 # ______________ Build components - sources and includes _______________________
 
 SOURCES += main.c
+SOURCES += mist_example.c
 #SOURCES += FreeRTOS-openocd.c hardfault.c
 
 # FreeRTOS

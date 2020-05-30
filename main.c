@@ -30,6 +30,7 @@
 #include "mist_comm_am_addrdisco.h"
 
 #include "mist_middleware.h"
+#include "mist_example.h"
 
 #include "loglevels.h"
 #define __MODUUL__ "main"
@@ -83,8 +84,11 @@ static comms_layer_t* radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_L
 
 static void main_loop ()
 {
-    am_addr_t node_addr = DEFAULT_AM_ADDR;
+    // Switch to a thread-safe logger
+    logger_fwrite_init();
+    log_init(BASE_LOG_LEVEL, &logger_fwrite, NULL);
 
+    am_addr_t node_addr = DEFAULT_AM_ADDR;
     // Initialize node signature - get address and EUI64
     if (SIG_GOOD == sigInit())
     {
@@ -119,7 +123,8 @@ static void main_loop ()
     // Setup mist middleware
     mist_middleware_init(radio);
 
-    // TODO registration of action modules
+    // Initialize the mist-example application
+    mist_example_init();
 
     // Lopp forever, printing uptime
     for (;;)
@@ -143,6 +148,9 @@ int main ()
     // LEDs
     PLATFORM_LedsInit();
 
+    // Button
+    PLATFORM_ButtonPinInit();
+
     // Configure debug output
     RETARGET_SerialInit();
     log_init(BASE_LOG_LEVEL, &logger_fwrite_boot, NULL);
@@ -160,11 +168,6 @@ int main ()
 
     if (osKernelReady == osKernelGetState())
     {
-        // Switch to a thread-safe logger
-        logger_fwrite_init();
-        log_init(BASE_LOG_LEVEL, &logger_fwrite, NULL);
-
-        // Start the kernel
         osKernelStart();
     }
     else
