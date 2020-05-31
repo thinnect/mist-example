@@ -57,6 +57,16 @@ typedef struct mist_module {
 } mist_module_t;
 
 /**
+ * Get the mistmiddleware library version.
+ *
+ * @param major - Pointer to store major version, may be NULL.
+ * @param minor - Pointer to store minor version, may be NULL.
+ * @param patch - Pointer to store patch version, may be NULL.
+ * @return \0 terminated string representation of the version.
+ */
+const char * mist_middleware_version(uint8_t * major, uint8_t * minor, uint8_t * patch);
+
+/**
  * Initialize the Mist Middleware.
  *
  * @param radio - Pointer to a communications interface to use.

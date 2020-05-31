@@ -121,6 +121,7 @@ static void main_loop ()
     }
 
     // Setup mist middleware
+    info1("mist middleware %s", mist_middleware_version(NULL, NULL, NULL));
     mist_middleware_init(radio);
 
     // Initialize the mist-example application
