@@ -194,6 +194,15 @@ SOURCES += \
 INCLUDES += -I$(ROOT_DIR)/libmist/
 LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 
+
+#beatsack
+ifneq ("$(wildcard libbeat/beatstack.h)","")
+    $(info "libbeat found and included")
+       INCLUDES += -I$(ROOT_DIR)/libbeat/
+       LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+endif
+
+
 # MoteXML components
 MOTEXML_DIR ?= $(ZOO)/prolab.motexml
 DTTYPES_DIR ?= $(ZOO)/prolab.dt-types
