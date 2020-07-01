@@ -17,6 +17,9 @@ DEFAULT_AM_ADDR         ?= 1
 # No bootloader, app starts at 0
 APP_START               = 0
 
+#include beatstack
+INCLUDE_BEATSTACK	= 0
+
 # Common build options - some of these should be moved to targets/boards
 CFLAGS                  += -Wall -std=c99
 CFLAGS                  += -ffunction-sections -fdata-sections -ffreestanding -fsingle-precision-constant -Wstrict-aliasing=0
@@ -196,12 +199,13 @@ LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 
 
 #beatsack
-ifneq ("$(wildcard libbeat/beatstack.h)","")
-    $(info "libbeat found and included")
-       INCLUDES += -I$(ROOT_DIR)/libbeat/
-       LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+ifeq ($(INCLUDE_BEATSTACK),1)
+    ifneq ("$(wildcard libbeat/beatstack.h)","")
+           $(info "libbeat found and included")
+           INCLUDES += -I$(ROOT_DIR)/libbeat/
+           LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+    endif
 endif
-
 
 # MoteXML components
 MOTEXML_DIR ?= $(ZOO)/prolab.motexml
