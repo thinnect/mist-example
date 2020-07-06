@@ -9,16 +9,16 @@ VERSION_MINOR           ?= 0
 VERSION_PATCH           ?= 0
 VERSION_DEVEL           ?= "-dev"
 
-DEFAULT_RADIO_CHANNEL   ?= 13
+DEFAULT_RADIO_CHANNEL   ?= 16
 
 # Set device address at compile time for cases where a signature is not present
 DEFAULT_AM_ADDR         ?= 1
-
+DEFAULT_PAN_ID		?= 0xFF
 # No bootloader, app starts at 0
 APP_START               = 0
 
 #include beatstack
-INCLUDE_BEATSTACK	= 0
+INCLUDE_BEATSTACK	    = 1
 
 # Common build options - some of these should be moved to targets/boards
 CFLAGS                  += -Wall -std=c99
@@ -59,7 +59,7 @@ PROGRAM_DEST_ADDR       ?= $(APP_START)
 # distributed with this project and must be installed with Simplicity Studio.
 # The variable needs to point at the subdirectory with the version number, set
 # it in Makefile.private or through the environment.
-SILABS_SDKDIR           ?= $(HOME)/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v2.7
+SILABS_SDKDIR           ?= $(HOME)/Desktop/workspace/silabs_sdk/v2.7
 
 # Pull in the developer's private configuration overrides and settings
 -include Makefile.private
@@ -121,7 +121,6 @@ INCLUDES += \
     -I$(SILABS_SDKDIR)/platform/radio/rail_lib/plugin/pa-conversions
 
 SOURCES += \
-    $(SILABS_SDKDIR)/util/silicon_labs/silabs_core/queue/circular_queue.c \
     $(SILABS_SDKDIR)/hardware/kit/common/drivers/retargetserial.c \
     $(SILABS_SDKDIR)/hardware/kit/common/drivers/retargetio.c \
     $(SILABS_SDKDIR)/platform/emlib/src/em_system.c \
@@ -199,7 +198,7 @@ LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 
 
 #beatsack
-ifeq ($(INCLUDE_BEATSTACK),1)
+ifeq ("$(INCLUDE_BEATSTACK)","1")
     ifneq ("$(wildcard libbeat/beatstack.h)","")
            $(info "libbeat found and included")
            INCLUDES += -I$(ROOT_DIR)/libbeat/
@@ -238,6 +237,10 @@ $(call passVarToCpp,CFLAGS,IDENT_TIMESTAMP)
 $(call passVarToCpp,CFLAGS,DEFAULT_AM_ADDR)
 $(call passVarToCpp,CFLAGS,DEFAULT_RADIO_CHANNEL)
 $(call passVarToCpp,CFLAGS,DEFAULT_PAN_ID)
+
+ifeq ("$(INCLUDE_BEATSTACK)","1")
+    $(call passVarToCpp,CFLAGS,INCLUDE_BEATSTACK)
+endif
 
 UUID_APPLICATION_BYTES = $(call uuidToCstr,$(UUID_APPLICATION))
 $(call passVarToCpp,CFLAGS,UUID_APPLICATION_BYTES)
