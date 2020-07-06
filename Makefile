@@ -198,7 +198,7 @@ LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 
 
 #beatsack
-ifeq ("$(INCLUDE_BEATSTACK)","1")
+ifeq ("$(INCLUDE_BEATSTACK)", "1")
     ifneq ("$(wildcard libbeat/beatstack.h)","")
            $(info "libbeat found and included")
            INCLUDES += -I$(ROOT_DIR)/libbeat/
