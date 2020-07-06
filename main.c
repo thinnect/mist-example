@@ -61,7 +61,7 @@ static comms_layer_t *radio_setup(am_addr_t node_addr, uint8_t eui[IEEE_EUI64_LE
     static am_addrdisco_t disco;
     static comms_addr_cache_t cache;
 
-    comms_layer_t *radio = radio_init(DEFAULT_RADIO_CHANNEL, 0xFF, node_addr);
+    comms_layer_t *radio = radio_init(DEFAULT_RADIO_CHANNEL, DEFAULT_PAN_ID, node_addr);
     if (NULL == radio)
     {
         return NULL;

@@ -9,16 +9,16 @@ VERSION_MINOR           ?= 0
 VERSION_PATCH           ?= 0
 VERSION_DEVEL           ?= "-dev"
 
-DEFAULT_RADIO_CHANNEL   ?= 16
+DEFAULT_RADIO_CHANNEL   ?= 13
 
 # Set device address at compile time for cases where a signature is not present
 DEFAULT_AM_ADDR         ?= 1
-DEFAULT_PAN_ID		?= 0xFF
+DEFAULT_PAN_ID		    ?= 0x22
 # No bootloader, app starts at 0
 APP_START               = 0
 
 #include beatstack
-INCLUDE_BEATSTACK	    = 1
+INCLUDE_BEATSTACK	    ?= 1
 
 # Common build options - some of these should be moved to targets/boards
 CFLAGS                  += -Wall -std=c99
@@ -59,7 +59,7 @@ PROGRAM_DEST_ADDR       ?= $(APP_START)
 # distributed with this project and must be installed with Simplicity Studio.
 # The variable needs to point at the subdirectory with the version number, set
 # it in Makefile.private or through the environment.
-SILABS_SDKDIR           ?= $(HOME)/Desktop/workspace/silabs_sdk/v2.7
+SILABS_SDKDIR           ?= $(HOME)/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v2.7
 
 # Pull in the developer's private configuration overrides and settings
 -include Makefile.private
@@ -203,6 +203,8 @@ ifeq ("$(INCLUDE_BEATSTACK)", "1")
            $(info "libbeat found and included")
            INCLUDES += -I$(ROOT_DIR)/libbeat/
            LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+    else
+           $(warning "Warning: libbeat enabled but not found")
     endif
 endif
 
