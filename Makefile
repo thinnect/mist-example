@@ -9,16 +9,16 @@ VERSION_MINOR           ?= 0
 VERSION_PATCH           ?= 0
 VERSION_DEVEL           ?= "-dev"
 
-DEFAULT_RADIO_CHANNEL   ?= 13
+DEFAULT_RADIO_CHANNEL   ?= 16
 
 # Set device address at compile time for cases where a signature is not present
 DEFAULT_AM_ADDR         ?= 1
-DEFAULT_PAN_ID		    ?= 0x22
+DEFAULT_PAN_ID          ?= 0x22
 # No bootloader, app starts at 0
 APP_START               = 0
 
 #include beatstack
-INCLUDE_BEATSTACK	    ?= 1
+INCLUDE_BEATSTACK	 ?= 0
 
 # Common build options - some of these should be moved to targets/boards
 CFLAGS                  += -Wall -std=c99
@@ -143,11 +143,11 @@ SOURCES += \
 
 # logging
 #CFLAGS += -DLOGGER_TIMESTAMP
-CFLAGS  += -DLOGGER_FWRITE
-SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_fwrite.c
+#CFLAGS  += -DLOGGER_FWRITE
+#SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_fwrite.c
 #CFLAGS  += -DLOGGER_LDMA_BUFFER_LENGTH=16384
-#CFLAGS  += -DLOGGER_LDMA
-#SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_ldma.c
+CFLAGS  += -DLOGGER_LDMA
+SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_ldma.c
 SOURCES += $(ZOO)/thinnect.lll/logging/loggers_ext.c
 INCLUDES += -I$(ZOO)/thinnect.lll/logging
 

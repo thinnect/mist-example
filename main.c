@@ -19,7 +19,7 @@
 #include "DeviceSignature.h"
 
 #include "loggers_ext.h"
-#include "logger_fwrite.h"
+#include "logger_ldma.h"
 
 #include "DeviceSignature.h"
 
@@ -118,8 +118,8 @@ static comms_layer_t *radio_setup(am_addr_t node_addr, uint8_t eui[IEEE_EUI64_LE
 static void main_loop()
 {
     // Switch to a thread-safe logger
-    logger_fwrite_init();
-    log_init(BASE_LOG_LEVEL, &logger_fwrite, NULL);
+    logger_ldma_init();
+    log_init(BASE_LOG_LEVEL, &logger_ldma, NULL);
 
     am_addr_t node_addr = DEFAULT_AM_ADDR;
     // Initialize node signature - get address and EUI64
