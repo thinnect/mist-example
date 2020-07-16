@@ -9,13 +9,16 @@ VERSION_MINOR           ?= 0
 VERSION_PATCH           ?= 0
 VERSION_DEVEL           ?= "-dev"
 
-DEFAULT_RADIO_CHANNEL   ?= 13
+DEFAULT_RADIO_CHANNEL   ?= 16
 
 # Set device address at compile time for cases where a signature is not present
 DEFAULT_AM_ADDR         ?= 1
-
+DEFAULT_PAN_ID          ?= 0x22
 # No bootloader, app starts at 0
 APP_START               = 0
+
+#include beatstack
+INCLUDE_BEATSTACK	 ?= 0
 
 # Common build options - some of these should be moved to targets/boards
 CFLAGS                  += -Wall -std=c99
@@ -118,7 +121,6 @@ INCLUDES += \
     -I$(SILABS_SDKDIR)/platform/radio/rail_lib/plugin/pa-conversions
 
 SOURCES += \
-    $(SILABS_SDKDIR)/util/silicon_labs/silabs_core/queue/circular_queue.c \
     $(SILABS_SDKDIR)/hardware/kit/common/drivers/retargetserial.c \
     $(SILABS_SDKDIR)/hardware/kit/common/drivers/retargetio.c \
     $(SILABS_SDKDIR)/platform/emlib/src/em_system.c \
@@ -141,11 +143,11 @@ SOURCES += \
 
 # logging
 #CFLAGS += -DLOGGER_TIMESTAMP
-CFLAGS  += -DLOGGER_FWRITE
-SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_fwrite.c
+#CFLAGS  += -DLOGGER_FWRITE
+#SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_fwrite.c
 #CFLAGS  += -DLOGGER_LDMA_BUFFER_LENGTH=16384
-#CFLAGS  += -DLOGGER_LDMA
-#SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_ldma.c
+CFLAGS  += -DLOGGER_LDMA
+SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_ldma.c
 SOURCES += $(ZOO)/thinnect.lll/logging/loggers_ext.c
 INCLUDES += -I$(ZOO)/thinnect.lll/logging
 
@@ -194,6 +196,18 @@ SOURCES += \
 INCLUDES += -I$(ROOT_DIR)/libmist/
 LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 
+
+#beatsack
+ifeq ("$(INCLUDE_BEATSTACK)", "1")
+    ifneq ("$(wildcard libbeat/beatstack.h)","")
+           $(info "libbeat found and included")
+           INCLUDES += -I$(ROOT_DIR)/libbeat/
+           LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+    else
+           $(warning "Warning: libbeat enabled but not found")
+    endif
+endif
+
 # MoteXML components
 MOTEXML_DIR ?= $(ZOO)/prolab.motexml
 DTTYPES_DIR ?= $(ZOO)/prolab.dt-types
@@ -225,6 +239,10 @@ $(call passVarToCpp,CFLAGS,IDENT_TIMESTAMP)
 $(call passVarToCpp,CFLAGS,DEFAULT_AM_ADDR)
 $(call passVarToCpp,CFLAGS,DEFAULT_RADIO_CHANNEL)
 $(call passVarToCpp,CFLAGS,DEFAULT_PAN_ID)
+
+ifeq ("$(INCLUDE_BEATSTACK)","1")
+    $(call passVarToCpp,CFLAGS,INCLUDE_BEATSTACK)
+endif
 
 UUID_APPLICATION_BYTES = $(call uuidToCstr,$(UUID_APPLICATION))
 $(call passVarToCpp,CFLAGS,UUID_APPLICATION_BYTES)

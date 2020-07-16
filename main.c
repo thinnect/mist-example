@@ -19,11 +19,14 @@
 #include "DeviceSignature.h"
 
 #include "loggers_ext.h"
-#include "logger_fwrite.h"
+#include "logger_ldma.h"
 
 #include "DeviceSignature.h"
 
 #include "radio.h"
+#ifdef INCLUDE_BEATSTACK
+#include "beatstack.h"
+#endif
 
 #include "announcement_app.h"
 
@@ -36,6 +39,7 @@
 #define __MODUUL__ "main"
 #define __LOG_LEVEL__ (LOG_LEVEL_main & BASE_LOG_LEVEL)
 #include "log.h"
+#include "sys_panic.h"
 
 #define DEVICE_ANNOUNCEMENT_PERIOD_S 300
 
@@ -45,25 +49,50 @@ INCBIN(Header, "header.bin");
 
 ieee_eui64_t g_eui; // Global node EUI
 
+static comms_layer_t * m_radio_comm = NULL;
+
+#ifdef INCLUDE_BEATSTACK
+static comms_layer_t * m_beat_comm = NULL;
+#endif
+
 static void radio_start_done (comms_layer_t * comms, comms_status_t status, void * user)
 {
     debug("started %d", status);
 }
 
-// Perform basic radio setup, register to receive RadioCountToLeds packets
-static comms_layer_t* radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_LENGTH])
+// Perform basic radio setup
+static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_LENGTH])
 {
-    static am_addrdisco_t disco;
-    static comms_addr_cache_t cache;
+    comms_layer_t * radio = NULL;
 
-    comms_layer_t * radio = radio_init(DEFAULT_RADIO_CHANNEL, 0x22, node_addr);
-    if (NULL == radio)
+    m_radio_comm = radio_init(DEFAULT_RADIO_CHANNEL, DEFAULT_PAN_ID, node_addr);
+    if (NULL == m_radio_comm)
     {
         return NULL;
     }
 
-    eui64_set(&(radio->eui), eui); // TODO this should have an API
+    eui64_set(&(m_radio_comm->eui), eui); // TODO this should have an API
 
+#ifdef INCLUDE_BEATSTACK
+    info1("Starting multi-hop");
+    m_beat_comm = beatstack_create(node_addr, m_radio_comm);
+    if (NULL == m_beat_comm)
+    {
+        err1("bs start"); // TODO remove once sys_panic learns to log
+        osDelay(10000);
+        sys_panic("bs start");
+    }
+    // Also set Global address of the device for the MH layer
+    eui64_set(&(m_beat_comm->eui), eui); // TODO this should have an API
+
+    radio = m_beat_comm;
+#else
+    info1("Starting single-hop");
+    radio = m_radio_comm;
+#endif
+
+    static am_addrdisco_t disco;
+    static comms_addr_cache_t cache;
     // Set up Global address resolution and caching
     comms_am_addrdisco_init(radio, &disco, &cache);
 
@@ -73,7 +102,7 @@ static comms_layer_t* radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_L
     }
 
     // Wait for radio to start, could use osTreadFlagWait and set from callback
-    while(COMMS_STARTED != comms_status(radio))
+    while (COMMS_STARTED != comms_status(radio))
     {
         osDelay(1);
     }
@@ -85,8 +114,8 @@ static comms_layer_t* radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_L
 static void main_loop ()
 {
     // Switch to a thread-safe logger
-    logger_fwrite_init();
-    log_init(BASE_LOG_LEVEL, &logger_fwrite, NULL);
+    logger_ldma_init();
+    log_init(BASE_LOG_LEVEL, &logger_ldma, NULL);
 
     am_addr_t node_addr = DEFAULT_AM_ADDR;
     // Initialize node signature - get address and EUI64
@@ -97,17 +126,18 @@ static void main_loop ()
     }
     else
     {
-        uint8_t eui[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, node_addr>>8, node_addr};
+        uint8_t eui[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, node_addr >> 8, node_addr};
         eui64_set(&g_eui, eui);
     }
-    infob1("ADDR:%"PRIX16" EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
+    infob1("ADDR:%" PRIX16 " EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
 
-    // initialize radio
-    comms_layer_t* radio = radio_setup(node_addr, g_eui.data);
+    // initialize radio for application use
+    comms_layer_t *radio = radio_setup(node_addr, g_eui.data);
     if (NULL == radio)
     {
-        err1("radio");
-        for (;;); // panic
+        err1("radio"); // TODO remove once sys_panic learns to log
+        osDelay(10000);
+        sys_panic("radio");
     }
 
     // Start deviceannouncement application ------------------------------------
@@ -156,7 +186,7 @@ int main ()
     RETARGET_SerialInit();
     log_init(BASE_LOG_LEVEL, &logger_fwrite_boot, NULL);
 
-    info1("TestMist "VERSION_STR" (%d.%d.%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+    info1("TestMist " VERSION_STR " (%d.%d.%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 
     PLATFORM_RadioInit(); // Radio GPIO/PRS - LNA on some MGM12P
 
@@ -164,7 +194,7 @@ int main ()
     osKernelInitialize();
 
     // Create a thread
-    const osThreadAttr_t thread_attr = { .name = "main" };
+    const osThreadAttr_t thread_attr = {.name = "main"};
     osThreadNew(main_loop, NULL, &thread_attr);
 
     if (osKernelReady == osKernelGetState())
@@ -176,5 +206,6 @@ int main ()
         err1("!osKernelReady");
     }
 
-    for(;;);
+    for (;;)
+        ;
 }
