@@ -30,13 +30,17 @@ typedef enum mist_item_type
 /**
  * Mist action function prototype.
  *
- * @param params    - array of MoteXML encoded parameters.
- * @param param_len - length of the parameters array
- * @param results   - output array.
- * @param param_len - length of the output array
- * @param params    - array of MoteXML encoded parameters.
- * @param param_len - length of the parameters array
- * @return 0 when call successful.
+ * Called when mist middleware executes control or queries state / samples for data.
+ *
+ * @param itype         - type of input, can be complex MoteXML data,
+ *                        an int32 or NULL for reading current state into output.
+ * @param input         - action function input, according to itype, NULL for read.
+ * @param input_length  - length of the input data.
+ * @param otype         - type of returned output, can be comlex MoteXML data or and int32.
+ * @param output        - buffer for data output.
+ * @param output_size   - size of the output array.
+ * @param output_length - length of the data stored in the output array by the called function.
+ * @return MIST_SUCCESS when call successful and otype value has been set.
  */
 typedef mist_error_t (*mist_action_function_f) (
             mist_item_type_t   itype, void * input,  uint16_t input_length,

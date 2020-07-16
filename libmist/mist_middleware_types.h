@@ -1,3 +1,9 @@
+/**
+ * Mist middleware basic types.
+ *
+ * Copyright Thinnect Inc. 2020
+ * @license <PROPRIETARY>
+ */
 #ifndef MIST_MIDDLEWARE_TYPES_H_
 #define MIST_MIDDLEWARE_TYPES_H_
 
