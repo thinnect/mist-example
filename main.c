@@ -39,6 +39,7 @@
 #define __MODUUL__ "main"
 #define __LOG_LEVEL__ (LOG_LEVEL_main & BASE_LOG_LEVEL)
 #include "log.h"
+#include "sys_panic.h"
 
 #define DEVICE_ANNOUNCEMENT_PERIOD_S 300
 
@@ -47,55 +48,51 @@
 INCBIN(Header, "header.bin");
 
 ieee_eui64_t g_eui; // Global node EUI
+
+static comms_layer_t * m_radio_comm = NULL;
+
 #ifdef INCLUDE_BEATSTACK
-static comms_layer_t *m_beat_comm = NULL;
+static comms_layer_t * m_beat_comm = NULL;
 #endif
-static void radio_start_done(comms_layer_t *comms, comms_status_t status, void *user)
+
+static void radio_start_done (comms_layer_t * comms, comms_status_t status, void * user)
 {
     debug("started %d", status);
 }
 
-// Perform basic radio setup, register to receive RadioCountToLeds packets
-static comms_layer_t *radio_setup(am_addr_t node_addr, uint8_t eui[IEEE_EUI64_LENGTH])
+// Perform basic radio setup
+static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_LENGTH])
 {
-    static am_addrdisco_t disco;
-    static comms_addr_cache_t cache;
+    comms_layer_t * radio = NULL;
 
-    comms_layer_t *radio = radio_init(DEFAULT_RADIO_CHANNEL, DEFAULT_PAN_ID, node_addr);
-    if (NULL == radio)
+    m_radio_comm = radio_init(DEFAULT_RADIO_CHANNEL, DEFAULT_PAN_ID, node_addr);
+    if (NULL == m_radio_comm)
     {
         return NULL;
     }
 
-    eui64_set(&(radio->eui), eui); // TODO this should have an API
+    eui64_set(&(m_radio_comm->eui), eui); // TODO this should have an API
+
 #ifdef INCLUDE_BEATSTACK
     info1("Starting multi-hop");
-    m_beat_comm = beatstack_create(node_addr, radio);
+    m_beat_comm = beatstack_create(node_addr, m_radio_comm);
     if (NULL == m_beat_comm)
     {
-        err1("bs start");
-        while (1)
-            ;
+        err1("bs start"); // TODO remove once sys_panic learns to log
+        osDelay(10000);
+        sys_panic("bs start");
     }
+    // Also set Global address of the device for the MH layer
+    eui64_set(&(m_beat_comm->eui), eui); // TODO this should have an API
 
-    // Set up Global address resolution and caching
-    comms_am_addrdisco_init(m_beat_comm, &disco, &cache);
-
-    if (COMMS_SUCCESS != comms_start(m_beat_comm, radio_start_done, NULL))
-    {
-        return NULL;
-    }
-
-    // Wait for radio to start, could use osTreadFlagWait and set from callback
-    while (COMMS_STARTED != comms_status(m_beat_comm))
-    {
-        osDelay(1);
-    }
-
-    debug1("radio rdy");
-    return radio;
+    radio = m_beat_comm;
 #else
-    info1("Starting single-hop")
+    info1("Starting single-hop");
+    radio = m_radio_comm;
+#endif
+
+    static am_addrdisco_t disco;
+    static comms_addr_cache_t cache;
     // Set up Global address resolution and caching
     comms_am_addrdisco_init(radio, &disco, &cache);
 
@@ -112,10 +109,9 @@ static comms_layer_t *radio_setup(am_addr_t node_addr, uint8_t eui[IEEE_EUI64_LE
 
     debug1("radio rdy");
     return radio;
-#endif
 }
 
-static void main_loop()
+static void main_loop ()
 {
     // Switch to a thread-safe logger
     logger_ldma_init();
@@ -135,21 +131,17 @@ static void main_loop()
     }
     infob1("ADDR:%" PRIX16 " EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
 
-    // initialize radio
+    // initialize radio for application use
     comms_layer_t *radio = radio_setup(node_addr, g_eui.data);
     if (NULL == radio)
     {
-        err1("radio");
-        for (;;)
-            ; // panic
+        err1("radio"); // TODO remove once sys_panic learns to log
+        osDelay(10000);
+        sys_panic("radio");
     }
 
     // Start deviceannouncement application ------------------------------------
-#ifdef INCLUDE_BEATSTACK
-    if (0 == announcement_app_init(m_beat_comm, DEVICE_ANNOUNCEMENT_PERIOD_S))
-#else
     if (0 == announcement_app_init(radio, DEVICE_ANNOUNCEMENT_PERIOD_S))
-#endif
     {
         debug1("annc started");
     }
@@ -160,11 +152,8 @@ static void main_loop()
 
     // Setup mist middleware
     info1("mist middleware %s", mist_middleware_version(NULL, NULL, NULL));
-#ifdef INCLUDE_BEATSTACK
-    mist_middleware_init(m_beat_comm);
-#else
     mist_middleware_init(radio);
-#endif
+
     // Initialize the mist-example application
     mist_example_init();
 
@@ -176,14 +165,14 @@ static void main_loop()
     }
 }
 
-int logger_fwrite_boot(const char *ptr, int len)
+int logger_fwrite_boot (const char *ptr, int len)
 {
     fwrite(ptr, len, 1, stdout);
     fflush(stdout);
     return len;
 }
 
-int main()
+int main ()
 {
     PLATFORM_Init();
 
