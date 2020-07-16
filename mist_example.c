@@ -53,6 +53,15 @@ static mist_error_t light_control(
 			m_light_output = -1;
 		}
 
+		if(m_light_output > 0)
+		{
+			PLATFORM_LedsSet(PLATFORM_LedsGet() | (1 << 2)); // LED2 on
+		}
+		else
+		{
+			PLATFORM_LedsSet(PLATFORM_LedsGet() & ~(1 << 2)); // LED2 off
+		}
+
 		*otype = MIST_ITEM_INT32;
 		*((int32_t*)output) = m_light_output;
 		*output_length = sizeof(int32_t);
