@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.3.0] - UNRELEASED
+
+### Added
+- Initial support for rule persisence in filesystem.
+- Rule priority handling.
+- Support for status rules.
+- Limited support for central lux sensor rules.
+
+### Fixed
+- Data is no longer sent when rule specifies data should not be sent.
+
 ## [0.2.3] - 2020-07-16
 
 ### Added

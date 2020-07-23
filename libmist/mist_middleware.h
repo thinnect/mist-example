@@ -87,6 +87,19 @@ void mist_middleware_init(comms_layer_t * radio);
 mist_error_t mist_register_handler(mist_module_t * module);
 
 /**
+ * Start the middleware - register receivers, start thread.
+ *
+ * Middleware must be initialized before calling start.
+ *
+ * Handlers should be registered before calling start, otherwise stored
+ * rules could be deleted when their handler is not registered and they are
+ * loaded from storage.
+ *
+ * @return MIST_SUCCESS if started successfully.
+ */
+mist_error_t mist_middleware_start();
+
+/**
  * Notify mist middleware about a spontaneous event from an action handler.
  *
  * @param module - pointer to an already registered module generating this event.

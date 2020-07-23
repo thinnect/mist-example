@@ -12,6 +12,7 @@
  */
 typedef enum mist_error
 {
+	MIST_ERR_PRIORITY = -2,
 	MIST_FAIL = -1,
 	MIST_SUCCESS = 0
 }
