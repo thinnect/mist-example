@@ -100,13 +100,16 @@ static void movement_detector_simulation_thread(void * arg)
 		osDelay(1000);
 		if (PLATFORM_ButtonGet())
 		{
+			mist_error_t r = MIST_FAIL;
+
+			info1("movement");
 			m_movement_count++;
 
 #ifdef LONG_EXAMPLE_FOR_EVENT_MESSAGE
 			uint8_t buffer[80];
 			uint16_t length = 0;
 			ml_encoder_t enc;
-			if(ML_SUCCESS == MLE_initialize(&enc, buffer, length))
+			if(ML_SUCCESS == MLE_initialize(&enc, buffer, sizeof(buffer)))
 			{
 				uint8_t index1 = MLE_appendO(&enc, dt_data);
 				uint8_t index2 = MLE_appendOSV(&enc, dt_data, index1, dt_movement_count);
@@ -117,13 +120,15 @@ static void movement_detector_simulation_thread(void * arg)
 				// MLE_appendOSV(&enc, dt_timestamp_utc, index1, 604401880);
 				length = MLE_finalize(&enc);
 			}
-			mist_error_t r = mist_spontaneous_event(&m_movement_module,
-			                                        MIST_ITEM_MOTEXML, buffer, length);
+
+			if (length > 0)
+			{
+				r = mist_spontaneous_event(&m_movement_module, MIST_ITEM_MOTEXML, buffer, length);
+			}
 #else // Use short example of encoding data
-			mist_error_t r = mist_spontaneous_event(&m_movement_module,
-			                                        MIST_ITEM_INT32, &m_movement_count, sizeof(int32_t));
+			r = mist_spontaneous_event(&m_movement_module, MIST_ITEM_INT32, &m_movement_count, sizeof(int32_t));
 #endif//LONG_EXAMPLE_FOR_EVENT_MESSAGE
-			info1("movement");
+
 			if (MIST_SUCCESS != r)
 			{
 				warn1("mov spnt evt %d", (int)r); // Something went wrong
