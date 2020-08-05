@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.2] - 2020-08-05
+
+### Fixed
+- Data with MIST_ITEM_INT32 sent incorrectly.
+
 ## [0.3.1] - 2020-07-24
 
 ### Added
