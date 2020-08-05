@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.3] - 2020-08-05
+
+### Fixed
+- Lighting rule result data match did not work for more complex data.
+
 ## [0.3.2] - 2020-08-05
 
 ### Fixed
