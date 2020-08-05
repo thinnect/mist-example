@@ -24,6 +24,28 @@ This repository contains a binary distribution of the Mist middleware that can
 be linked into the final application. See the [libmist](libmist) directory.
 Currently only a release for the efr32xg21 family is available.
 
+## Mist library setup
+
+The mist library is linked to the firmware from `libmistmiddleware.a`. The
+library needs to be initialized with `mist_middleware_init`, providing it a
+pointer to an initialized radio layer. Initialization should be followed by
+calls to `mist_register_handler` to add action handlers. After all handlers
+have been registered, a call to `mist_middleware_start` will start the actual
+mist middleware, loading stored rules and registering communication paths.
+Handlers should be registered before start, because any rules loaded during
+start that do not have a corresponding handler, are discarded.
+
+## Persistent rule storage
+
+The mist middleware stores rules that have an infinite timeout (UINT32_MAX) in
+flash memory (TODO in the future other rules will also be stored in flash for
+their duration).
+Stored rules are marked with IDENT_TIMESTAMP and discarded automatically when
+firmware is changed (IDENT_TIMESTAMP changes). The storage component uses
+the [node-filesystem](https://github.com/thinnect/node-filesystem.git) wrapper
+around [SPIFFS](https://github.com/pellepl/spiffs). The filesystem needs to be
+initialized before `mist_middleware_start` is called.
+
 # Device Announcement
 
 The device announcement protocol is intended to allow Mist nodes to let other

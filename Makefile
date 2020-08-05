@@ -114,7 +114,10 @@ INCLUDES += \
     -I$(SILABS_SDKDIR)/hardware/kit/common/drivers \
     -I$(SILABS_SDKDIR)/platform/halconfig/inc/hal-config \
     -I$(SILABS_SDKDIR)/platform/emlib/inc \
+    -I$(SILABS_SDKDIR)/platform/emdrv/common/inc \
     -I$(SILABS_SDKDIR)/platform/emdrv/sleep/inc \
+    -I$(SILABS_SDKDIR)/platform/emdrv/dmadrv/inc \
+    -I$(SILABS_SDKDIR)/platform/emdrv/dmadrv/config \
     -I$(SILABS_SDKDIR)/platform/radio/rail_lib/hal \
     -I$(SILABS_SDKDIR)/platform/radio/rail_lib/common \
     -I$(SILABS_SDKDIR)/platform/radio/rail_lib/protocol/ieee802154 \
@@ -139,6 +142,7 @@ SOURCES += \
     $(SILABS_SDKDIR)/platform/emlib/src/em_timer.c \
     $(SILABS_SDKDIR)/platform/emlib/src/em_wdog.c \
     $(SILABS_SDKDIR)/platform/emdrv/sleep/src/sleep.c \
+    $(SILABS_SDKDIR)/platform/emdrv/dmadrv/src/dmadrv.c \
     $(SILABS_SDKDIR)/platform/radio/rail_lib/hal/hal_common.c
 
 # logging
@@ -146,7 +150,7 @@ SOURCES += \
 #CFLAGS  += -DLOGGER_FWRITE
 #SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_fwrite.c
 #CFLAGS  += -DLOGGER_LDMA_BUFFER_LENGTH=16384
-CFLAGS  += -DLOGGER_LDMA
+CFLAGS  += -DLOGGER_LDMA -DLOGGER_LDMA_DMADRV
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_ldma.c
 SOURCES += $(ZOO)/thinnect.lll/logging/loggers_ext.c
 INCLUDES += -I$(ZOO)/thinnect.lll/logging
@@ -169,6 +173,20 @@ INCLUDES += -I$(ZOO)/lammertb.libcrc/include \
             -I$(ZOO)/jtbr.endianness \
             -I$(ZOO)/graphitemaster.incbin
 SOURCES += $(ZOO)/lammertb.libcrc/src/crcccitt.c
+SOURCES += $(ZOO)/lammertb.libcrc/src/crc16.c
+
+# spiffs
+INCLUDES += -I$(ZOO)/pellepl.spiffs/src
+SOURCES += $(ZOO)/pellepl.spiffs/src/spiffs_cache.c \
+           $(ZOO)/pellepl.spiffs/src/spiffs_check.c \
+           $(ZOO)/pellepl.spiffs/src/spiffs_gc.c \
+           $(ZOO)/pellepl.spiffs/src/spiffs_hydrogen.c \
+           $(ZOO)/pellepl.spiffs/src/spiffs_nucleus.c
+
+# filesystem
+INCLUDES += -I$(ZOO)/thinnect.node-filesystem
+INCLUDES += -I$(ZOO)/thinnect.node-filesystem/config
+SOURCES += $(ZOO)/thinnect.node-filesystem/fs.c
 
 # mistcomm
 INCLUDES += -I$(ZOO)/thinnect.mist-comm/include
@@ -184,13 +202,15 @@ SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/cmsis/*.c)
 
 # platform stuff - watchdog, io etc...
 INCLUDES += -I$(NODE_PLATFORM_DIR)/include
-INCLUDES += -I$(NODE_PLATFORM_DIR)/include/silabs
+SOURCES += $(NODE_PLATFORM_DIR)/common/platform_mutex.c
+SOURCES += $(NODE_PLATFORM_DIR)/common/spi_flash.c
+SOURCES += $(NODE_PLATFORM_DIR)/common/radio_seqNum.c
+SOURCES += $(NODE_PLATFORM_DIR)/common/eui64.c
+SOURCES += $(NODE_PLATFORM_DIR)/common/sys_panic.c
 
-SOURCES += \
-    $(NODE_PLATFORM_DIR)/silabs/radio_rtos.c \
-    $(NODE_PLATFORM_DIR)/common/radio_seqNum.c \
-    $(NODE_PLATFORM_DIR)/common/eui64.c \
-    $(NODE_PLATFORM_DIR)/common/sys_panic.c
+INCLUDES += -I$(NODE_PLATFORM_DIR)/include/silabs
+SOURCES += $(NODE_PLATFORM_DIR)/silabs/radio_rtos.c
+SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargetspi.c
 
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/

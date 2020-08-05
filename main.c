@@ -9,11 +9,10 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "retargetserial.h"
-
-#include "cmsis_os2_ext.h"
-
 #include "platform.h"
+
+#include "retargetserial.h"
+#include "retargetspi.h"
 
 #include "SignatureArea.h"
 #include "DeviceSignature.h"
@@ -21,12 +20,21 @@
 #include "loggers_ext.h"
 #include "logger_ldma.h"
 
+#include "cmsis_os2_ext.h"
+
 #include "DeviceSignature.h"
 
 #include "radio.h"
 #ifdef INCLUDE_BEATSTACK
 #include "beatstack.h"
 #endif
+
+// emdrv components
+#include "sleep.h"
+#include "dmadrv.h"
+
+#include "fs.h"
+#include "spi_flash.h"
 
 #include "announcement_app.h"
 
@@ -41,11 +49,15 @@
 #include "log.h"
 #include "sys_panic.h"
 
+#define FS_SPIFFS_DATA_PARTITION 2
+
 #define DEVICE_ANNOUNCEMENT_PERIOD_S 300
 
 // Include the information header binary
 #include "incbin.h"
 INCBIN(Header, "header.bin");
+
+static fs_driver_t m_spi_fs_driver;
 
 ieee_eui64_t g_eui; // Global node EUI
 
@@ -111,6 +123,33 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
     return radio;
 }
 
+static void filesystem_setup ()
+{
+    // SPI for dataflash
+    RETARGET_SpiInit();
+
+    // Get dataflash chip ID
+    uint8_t jedec[4] = {0};
+    RETARGET_SpiTransferHalf(0, "\x9F", 1, jedec, 4);
+    info1("jedec %02x%02x%02x%02x", jedec[0], jedec[1], jedec[2], jedec[3]);
+
+    spi_flash_init();
+    // spi_flash_mass_erase();
+
+    m_spi_fs_driver.read = spi_flash_read;
+    m_spi_fs_driver.write = spi_flash_write;
+    m_spi_fs_driver.erase = spi_flash_erase;
+    m_spi_fs_driver.size = spi_flash_size;
+    m_spi_fs_driver.erase_size = spi_flash_erase_size;
+    m_spi_fs_driver.lock = spi_flash_lock;
+    m_spi_fs_driver.unlock = spi_flash_unlock;
+
+    fs_init(0, FS_SPIFFS_DATA_PARTITION, &m_spi_fs_driver);
+
+    fs_start();
+}
+
+
 static void main_loop ()
 {
     // Switch to a thread-safe logger
@@ -130,6 +169,10 @@ static void main_loop ()
         eui64_set(&g_eui, eui);
     }
     infob1("ADDR:%" PRIX16 " EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
+
+    // Initialize SPI flash filesystem
+    filesystem_setup();
+    debug1("fs rdy");
 
     // initialize radio for application use
     comms_layer_t *radio = radio_setup(node_addr, g_eui.data);
@@ -154,15 +197,28 @@ static void main_loop ()
     info1("mist middleware %s", mist_middleware_version(NULL, NULL, NULL));
     mist_middleware_init(radio);
 
-    // Initialize the mist-example application
+    // Initialize the mist-example application, register handlers
     mist_example_init();
 
-    // Lopp forever, printing uptime
+    // All registrations should be done now, start middleware
+    mist_error_t merr = mist_middleware_start();
+    if(MIST_SUCCESS != merr)
+    {
+        err1("merr %d", merr);
+    }
+    debug1("mist rdy");
+
+    // Loop forever, printing uptime
     for (;;)
     {
         info1("uptime: %u", (unsigned int)osCounterGetSecond());
         osDelay(60000);
     }
+}
+
+uint32_t ident_timestamp () // TODO this should be moved elsewhere
+{
+    return IDENT_TIMESTAMP;
 }
 
 int logger_fwrite_boot (const char *ptr, int len)
@@ -192,6 +248,13 @@ int main ()
 
     // Initialize OS kernel
     osKernelInitialize();
+
+    // Initialize sleep management
+    SLEEP_Init(NULL, NULL);
+    //SLEEP_SleepBlockBegin(sleepEM2);
+
+    // Initialize DMADRV
+    DMADRV_Init();
 
     // Create a thread
     const osThreadAttr_t thread_attr = {.name = "main"};

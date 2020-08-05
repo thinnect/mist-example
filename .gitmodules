@@ -5,7 +5,11 @@
 [submodule "zoo/thinnect.node-platform"]
 	path = zoo/thinnect.node-platform
 	url = https://github.com/thinnect/node-platform.git
-	branch = 8bit_radio_ldma
+	branch = newmaster
+[submodule "zoo/thinnect.node-filesystem"]
+	path = zoo/thinnect.node-filesystem
+	url = https://github.com/thinnect/node-filesystem.git
+	branch = master
 [submodule "zoo/thinnect.lll"]
 	path = zoo/thinnect.lll
 	url = https://github.com/thinnect/lll.git
@@ -47,6 +51,10 @@
 [submodule "zoo/graphitemaster.incbin"]
 	path = zoo/graphitemaster.incbin
 	url = https://github.com/graphitemaster/incbin.git
+	branch = master
+[submodule "zoo/pellepl.spiffs"]
+	path = zoo/pellepl.spiffs
+	url = https://github.com/pellepl/spiffs.git
 	branch = master
 
 [submodule "zoo/prolab.motexml"]
