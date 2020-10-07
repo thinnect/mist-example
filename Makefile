@@ -91,7 +91,7 @@ SOURCES += mist_mod_lighting.c
 SOURCES += mist_mod_movement.c
 SOURCES += mist_mod_button.c
 SOURCES += dummy_node_coordinates.c
-SOURCES += FreeRTOS-openocd.c hardfault.c stackoverflow.c
+#SOURCES += FreeRTOS-openocd.c hardfault.c stackoverflow.c
 
 # FreeRTOS
 FREERTOS_DIR ?= $(ZOO)/FreeRTOS-Kernel
