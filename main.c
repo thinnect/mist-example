@@ -17,16 +17,19 @@
 #include "SignatureArea.h"
 #include "DeviceSignature.h"
 
-#include "loggers_ext.h"
-#include "logger_ldma.h"
+#include "basic_rtos_logger_setup.h"
+#include "basic_rtos_filesystem_setup.h"
 
 #include "cmsis_os2_ext.h"
 
 #include "DeviceSignature.h"
 
+#include "time_rtc.h"
+
 #include "radio.h"
 #ifdef INCLUDE_BEATSTACK
 #include "beatstack.h"
+#include "basic_rtos_beatstack_timesync.h"
 #endif
 
 // emdrv components
@@ -57,8 +60,6 @@
 #include "incbin.h"
 INCBIN(Header, "header.bin");
 
-static fs_driver_t m_spi_fs_driver;
-
 ieee_eui64_t g_eui; // Global node EUI
 
 static comms_layer_t * m_radio_comm = NULL;
@@ -87,7 +88,7 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
 
 #ifdef INCLUDE_BEATSTACK
     info1("Starting multi-hop");
-    m_beat_comm = beatstack_create(node_addr, m_radio_comm);
+    m_beat_comm = beatstack_create(node_addr, m_radio_comm, basic_nw_time_changed);
     if (NULL == m_beat_comm)
     {
         err1("bs start"); // TODO remove once sys_panic learns to log
@@ -123,38 +124,10 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
     return radio;
 }
 
-static void filesystem_setup ()
-{
-    // SPI for dataflash
-    RETARGET_SpiInit();
-
-    // Get dataflash chip ID
-    uint8_t jedec[4] = {0};
-    RETARGET_SpiTransferHalf(0, "\x9F", 1, jedec, 4);
-    info1("jedec %02x%02x%02x%02x", jedec[0], jedec[1], jedec[2], jedec[3]);
-
-    spi_flash_init();
-    // spi_flash_mass_erase();
-
-    m_spi_fs_driver.read = spi_flash_read;
-    m_spi_fs_driver.write = spi_flash_write;
-    m_spi_fs_driver.erase = spi_flash_erase;
-    m_spi_fs_driver.size = spi_flash_size;
-    m_spi_fs_driver.erase_size = spi_flash_erase_size;
-    m_spi_fs_driver.lock = spi_flash_lock;
-    m_spi_fs_driver.unlock = spi_flash_unlock;
-
-    fs_init(0, FS_SPIFFS_DATA_PARTITION, &m_spi_fs_driver);
-
-    fs_start();
-}
-
-
 static void main_loop ()
 {
     // Switch to a thread-safe logger
-    logger_ldma_init();
-    log_init(BASE_LOG_LEVEL, &logger_ldma, NULL);
+    basic_rtos_logger_setup();
 
     am_addr_t node_addr = DEFAULT_AM_ADDR;
     // Initialize node signature - get address and EUI64
@@ -170,8 +143,10 @@ static void main_loop ()
     }
     infob1("ADDR:%" PRIX16 " EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
 
+    time_rtc_init();
+
     // Initialize SPI flash filesystem
-    filesystem_setup();
+    basic_rtos_filesystem_setup();
     debug1("fs rdy");
 
     // initialize radio for application use
@@ -197,8 +172,10 @@ static void main_loop ()
     info1("mist middleware %s", mist_middleware_version(NULL, NULL, NULL));
     mist_middleware_init(radio);
 
-    // Initialize the mist-example application, register handlers
-    mist_example_init();
+    // Initialize the mist-example applications that register handlers
+    mist_mod_lighting_init();
+    mist_mod_movement_init();
+    mist_mod_button_init();
 
     // All registrations should be done now, start middleware
     mist_error_t merr = mist_middleware_start();
@@ -211,21 +188,9 @@ static void main_loop ()
     // Loop forever, printing uptime
     for (;;)
     {
-        info1("uptime: %u", (unsigned int)osCounterGetSecond());
+        info1("uptime: %u unix_time: %u", (unsigned int)osCounterGetSecond(), (unsigned int)time(NULL));
         osDelay(60000);
     }
-}
-
-uint32_t ident_timestamp () // TODO this should be moved elsewhere
-{
-    return IDENT_TIMESTAMP;
-}
-
-int logger_fwrite_boot (const char *ptr, int len)
-{
-    fwrite(ptr, len, 1, stdout);
-    fflush(stdout);
-    return len;
 }
 
 int main ()
@@ -239,8 +204,7 @@ int main ()
     PLATFORM_ButtonPinInit();
 
     // Configure debug output
-    RETARGET_SerialInit();
-    log_init(BASE_LOG_LEVEL, &logger_fwrite_boot, NULL);
+    basic_noos_logger_setup();
 
     info1("TestMist " VERSION_STR " (%d.%d.%d)", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 

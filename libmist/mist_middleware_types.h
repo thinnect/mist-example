@@ -7,6 +7,8 @@
 #ifndef MIST_MIDDLEWARE_TYPES_H_
 #define MIST_MIDDLEWARE_TYPES_H_
 
+#include <stdint.h>
+
 /**
  * Mist success-fail type. 0 for success.
  */
@@ -15,8 +17,7 @@ typedef enum mist_error
 	MIST_ERR_PRIORITY = -2,
 	MIST_FAIL = -1,
 	MIST_SUCCESS = 0
-}
-mist_error_t;
+} mist_error_t;
 
 /**
  * Local subscription id: 0 <= lid < SUBS_LOCALID_NONE

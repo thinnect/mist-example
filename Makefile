@@ -29,7 +29,7 @@ CFLAGS                  += -DVTOR_START_LOCATION=$(APP_START)
 LDFLAGS                 += -nostartfiles -Wl,--gc-sections -Wl,--relax -Wl,-Map=$(@:.elf=.map),--cref -Wl,--wrap=atexit
 LDFLAGS                 += -Wl,--undefined=gHeaderData -Wl,--undefined=gHeaderSize
 LDFLAGS                 += -Wl,--undefined=uxTopUsedPriority
-LDLIBS                  += -lgcc -lm
+LDLIBS                  += -lgcc
 INCLUDES                += -Xassembler -I$(BUILD_DIR) -I.
 
 # If set, disables asserts and debugging, enables optimization
@@ -87,8 +87,11 @@ NODE_PLATFORM_DIR       := $(ZOO)/thinnect.node-platform
 # ______________ Build components - sources and includes _______________________
 
 SOURCES += main.c
-SOURCES += mist_example.c
-#SOURCES += FreeRTOS-openocd.c hardfault.c
+SOURCES += mist_mod_lighting.c
+SOURCES += mist_mod_movement.c
+SOURCES += mist_mod_button.c
+SOURCES += dummy_node_coordinates.c
+#SOURCES += FreeRTOS-openocd.c hardfault.c stackoverflow.c
 
 # FreeRTOS
 FREERTOS_DIR ?= $(ZOO)/FreeRTOS-Kernel
@@ -152,8 +155,14 @@ SOURCES += \
 #CFLAGS  += -DLOGGER_LDMA_BUFFER_LENGTH=16384
 CFLAGS  += -DLOGGER_LDMA -DLOGGER_LDMA_DMADRV
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_ldma.c
+SOURCES += $(NODE_PLATFORM_DIR)/silabs/logger_fwrite_basic.c
 SOURCES += $(ZOO)/thinnect.lll/logging/loggers_ext.c
 INCLUDES += -I$(ZOO)/thinnect.lll/logging
+
+# Some common setup-scenario implementations
+INCLUDES += -I$(NODE_PLATFORM_DIR)/widgets
+SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_filesystem_setup.c
+SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_logger_setup.c
 
 # device signature
 INCLUDES += -I$(ZOO)/thinnect.device-signature/signature \
@@ -199,6 +208,7 @@ SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/api/*.c)
 SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/addrcache/*.c)
 SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/routing/*.c)
 SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/cmsis/*.c)
+SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/control/*.c)
 
 # platform stuff - watchdog, io etc...
 INCLUDES += -I$(NODE_PLATFORM_DIR)/include
@@ -207,10 +217,14 @@ SOURCES += $(NODE_PLATFORM_DIR)/common/spi_flash.c
 SOURCES += $(NODE_PLATFORM_DIR)/common/radio_seqNum.c
 SOURCES += $(NODE_PLATFORM_DIR)/common/eui64.c
 SOURCES += $(NODE_PLATFORM_DIR)/common/sys_panic.c
+SOURCES += $(NODE_PLATFORM_DIR)/common/time_rtc.c
+SOURCES += $(NODE_PLATFORM_DIR)/common/yxktime.c
+SOURCES += $(NODE_PLATFORM_DIR)/common/ident_parameters.c
 
 INCLUDES += -I$(NODE_PLATFORM_DIR)/include/silabs
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/radio_rtos.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargetspi.c
+SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/
@@ -223,6 +237,7 @@ ifeq ("$(INCLUDE_BEATSTACK)", "1")
            $(info "libbeat found and included")
            INCLUDES += -I$(ROOT_DIR)/libbeat/
            LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+           SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_beatstack_timesync.c
     else
            $(warning "Warning: libbeat enabled but not found")
     endif
@@ -238,6 +253,9 @@ CFLAGS += -DLIBEXPORT=""
 
 # Pull in the grunt work
 include $(BUILDSYSTEM_DIR)/Makerules
+
+# for whatever reason libm must come after the libraries that use it, so make sure it is last
+LDLIBS += -lm
 # ------------------------------------------------------------------------------
 
 # Print some build parameters
@@ -289,7 +307,7 @@ $(BUILD_DIR)/header.bin: Makefile | $(BUILD_DIR)
 
 $(BUILD_DIR)/$(PROJECT_NAME).elf: $(OBJECTS)
 	$(call pInfo,Linking [$@])
-	$(HIDE_CMD)$(CC) $(CFLAGS) $(INCLUDES) $(OBJECTS) $(LDLIBS) $(LDFLAGS) -o $@
+	$(HIDE_CMD)$(CC) $(CFLAGS) $(INCLUDES) $(OBJECTS) $(LDFLAGS) $(LDLIBS) -o $@
 
 $(BUILD_DIR)/$(PROJECT_NAME).bin: $(BUILD_DIR)/$(PROJECT_NAME).elf
 	$(call pInfo,Exporting [$@])
