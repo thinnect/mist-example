@@ -24,9 +24,12 @@
 
 #include "DeviceSignature.h"
 
+#include "time_rtc.h"
+
 #include "radio.h"
 #ifdef INCLUDE_BEATSTACK
 #include "beatstack.h"
+#include "basic_rtos_beatstack_timesync.h"
 #endif
 
 // emdrv components
@@ -85,7 +88,7 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
 
 #ifdef INCLUDE_BEATSTACK
     info1("Starting multi-hop");
-    m_beat_comm = beatstack_create(node_addr, m_radio_comm);
+    m_beat_comm = beatstack_create(node_addr, m_radio_comm, basic_nw_time_changed);
     if (NULL == m_beat_comm)
     {
         err1("bs start"); // TODO remove once sys_panic learns to log
@@ -140,6 +143,8 @@ static void main_loop ()
     }
     infob1("ADDR:%" PRIX16 " EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
 
+    time_rtc_init();
+
     // Initialize SPI flash filesystem
     basic_rtos_filesystem_setup();
     debug1("fs rdy");
@@ -183,7 +188,7 @@ static void main_loop ()
     // Loop forever, printing uptime
     for (;;)
     {
-        info1("uptime: %u", (unsigned int)osCounterGetSecond());
+        info1("uptime: %u unix_time: %u", (unsigned int)osCounterGetSecond(), (unsigned int)time(NULL));
         osDelay(60000);
     }
 }

@@ -208,6 +208,7 @@ SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/api/*.c)
 SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/addrcache/*.c)
 SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/routing/*.c)
 SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/cmsis/*.c)
+SOURCES += $(wildcard $(ZOO)/thinnect.mist-comm/control/*.c)
 
 # platform stuff - watchdog, io etc...
 INCLUDES += -I$(NODE_PLATFORM_DIR)/include
@@ -217,6 +218,7 @@ SOURCES += $(NODE_PLATFORM_DIR)/common/radio_seqNum.c
 SOURCES += $(NODE_PLATFORM_DIR)/common/eui64.c
 SOURCES += $(NODE_PLATFORM_DIR)/common/sys_panic.c
 SOURCES += $(NODE_PLATFORM_DIR)/common/time_rtc.c
+SOURCES += $(NODE_PLATFORM_DIR)/common/yxktime.c
 SOURCES += $(NODE_PLATFORM_DIR)/common/ident_parameters.c
 
 INCLUDES += -I$(NODE_PLATFORM_DIR)/include/silabs
@@ -235,6 +237,7 @@ ifeq ("$(INCLUDE_BEATSTACK)", "1")
            $(info "libbeat found and included")
            INCLUDES += -I$(ROOT_DIR)/libbeat/
            LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+           SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_beatstack_timesync.c
     else
            $(warning "Warning: libbeat enabled but not found")
     endif
