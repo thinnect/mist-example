@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - Support for illuminance rules.
 
-## [0.4.0] - (unreleased)
+## [0.4.0] - 2020-10-08
 
 ### Changed
 - Library now uses refactored mist rule interpreter.
