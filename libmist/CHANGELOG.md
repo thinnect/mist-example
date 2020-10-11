@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [future] - (unreleased)
 
+## [0.4.1] - 2020-10-11
+
+### Added
+- Priority based rule sorting.
+- Support for freeze.
+
 ### Added
 - Support for illuminance rules.
 
