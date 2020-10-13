@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [future] - (unreleased)
 
+## [0.4.2] - 2020-10-13
+
+### Fixed
+- Data timestamp parsing when data under top-level dt_data element.
+
+### Added
+- Support for illuminance rules.
+
+## [0.4.1] - 2020-10-11
+
+### Added
+- Priority based rule sorting.
+- Support for freeze.
+
 ### Added
 - Support for illuminance rules.
 
