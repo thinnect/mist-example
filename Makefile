@@ -63,6 +63,9 @@ DEFAULT_BUILD_TARGET    ?= $(PROJECT_NAME)
 PROGRAM_IMAGE           ?= $(BUILD_DIR)/$(PROJECT_NAME).bin
 PROGRAM_DEST_ADDR       ?= $(APP_START)
 
+# Flash header
+FHEADER_DEST_ADDR        = $(FLASH_HEADER_LOC)
+
 # Silabs SDK location and version, due to licensing terms, the SDK is not
 # distributed with this project and must be installed with Simplicity Studio.
 # The variable needs to point at the subdirectory with the version number, set
