@@ -14,11 +14,19 @@ DEFAULT_RADIO_CHANNEL   ?= 16
 # Set device address at compile time for cases where a signature is not present
 DEFAULT_AM_ADDR         ?= 1
 DEFAULT_PAN_ID          ?= 0x22
-# No bootloader, app starts at 0
-APP_START               = 0
+
+#include bootloader
+INCLUDE_BOOTLOADER ?= 0
 
 #include beatstack
 INCLUDE_BEATSTACK	 ?= 0
+
+#app start
+#if bootloader is included APP_START value is retrived from .board file
+#with current bootloader APP_START should be 0x20000
+ifeq ("$(INCLUDE_BOOTLOADER)", "0")
+	APP_START = 0
+endif
 
 # Common build options - some of these should be moved to targets/boards
 CFLAGS                  += -Wall -std=c99
@@ -315,7 +323,18 @@ $(BUILD_DIR)/$(PROJECT_NAME).bin: $(BUILD_DIR)/$(PROJECT_NAME).elf
 	$(HIDE_CMD)$(TC_OBJCOPY) --strip-all -O binary "$<" "$@"
 	$(HIDE_CMD)$(HEADEREDIT) -v size -v crc $@
 
+$(BUILD_DIR)/combo.bin: bootloader/wfs201-bootloader.bin $(BUILD_DIR)/$(PROJECT_NAME).bin
+	$(call pInfo,Building combo [$@])
+	srec_cat bootloader/wfs201-bootloader.bin -binary -offset $(BOOTLOADER_START) \
+	                  $(BUILD_DIR)/$(PROJECT_NAME).bin -binary -offset $(APP_START) \
+	                  -o $@ -binary
+	chmod 755 "$@"
+
+ifeq ("$(INCLUDE_BOOTLOADER)", "1")
+$(PROJECT_NAME): $(BUILD_DIR)/combo.bin
+else
 $(PROJECT_NAME): $(BUILD_DIR)/$(PROJECT_NAME).bin
+endif
 
 # _______________________________ Utility rules ________________________________
 

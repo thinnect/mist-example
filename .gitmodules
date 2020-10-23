@@ -73,4 +73,4 @@
 [submodule "zoo/thinnect.hiot-platforms"]
 	path = zoo/thinnect.hiot-platforms
 	url = git@github.com:thinnect/hiot-platforms.git
-	branch = master
+	branch = trgt_change
