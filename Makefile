@@ -11,8 +11,8 @@ VERSION_DEVEL           ?= "-dev"
 
 DEFAULT_RADIO_CHANNEL   ?= 16
 
-# Set device address at compile time for cases where a signature is not present
-DEFAULT_AM_ADDR         ?= 1
+# Set device address at compile time, will override signature when != 0
+NODE_AM_ADDR            ?= 0
 DEFAULT_PAN_ID          ?= 0x22
 
 #include bootloader
@@ -270,7 +270,7 @@ LDLIBS += -lm
 # ------------------------------------------------------------------------------
 
 # Print some build parameters
-$(info DEFAULT_AM_ADDR=$(DEFAULT_AM_ADDR))
+$(info NODE_AM_ADDR=$(NODE_AM_ADDR))
 $(info DEFAULT_RADIO_CHANNEL=$(DEFAULT_RADIO_CHANNEL))
 $(info DEFAULT_PAN_ID=$(DEFAULT_PAN_ID))
 $(info DEFAULT_RFPOWER_DBM=$(DEFAULT_RFPOWER_DBM))
@@ -285,7 +285,7 @@ $(call passVarToCpp,CFLAGS,SW_MINOR_VERSION)
 $(call passVarToCpp,CFLAGS,SW_PATCH_VERSION)
 $(call passVarToCpp,CFLAGS,IDENT_TIMESTAMP)
 
-$(call passVarToCpp,CFLAGS,DEFAULT_AM_ADDR)
+$(call passVarToCpp,CFLAGS,NODE_AM_ADDR)
 $(call passVarToCpp,CFLAGS,DEFAULT_RADIO_CHANNEL)
 $(call passVarToCpp,CFLAGS,DEFAULT_PAN_ID)
 
