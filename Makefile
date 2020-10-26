@@ -25,7 +25,10 @@ INCLUDE_BEATSTACK	 ?= 0
 #if bootloader is included APP_START value is retrived from .board file
 #with current bootloader APP_START should be 0x20000
 ifeq ("$(INCLUDE_BOOTLOADER)", "0")
-	APP_START = 0
+  APP_START = 0
+  PROGRAM_IMAGE           ?= $(BUILD_DIR)/$(PROJECT_NAME).bin
+else
+  PROGRAM_IMAGE           ?= $(BUILD_DIR)/combo.bin
 endif
 
 # Common build options - some of these should be moved to targets/boards
@@ -33,7 +36,7 @@ CFLAGS                  += -Wall -std=c99
 CFLAGS                  += -ffunction-sections -fdata-sections -ffreestanding -fsingle-precision-constant -Wstrict-aliasing=0
 CFLAGS                  += -DconfigUSE_TICKLESS_IDLE=0
 CFLAGS                  += -D__START=main -D__STARTUP_CLEAR_BSS
-CFLAGS                  += -DVTOR_START_LOCATION=$(APP_START)
+CFLAGS                  += -DVTOR_START_LOCATION=$(APP_START) -Wl,--section-start=.text=$(APP_START)
 LDFLAGS                 += -nostartfiles -Wl,--gc-sections -Wl,--relax -Wl,-Map=$(@:.elf=.map),--cref -Wl,--wrap=atexit
 LDFLAGS                 += -Wl,--undefined=gHeaderData -Wl,--undefined=gHeaderSize
 LDFLAGS                 += -Wl,--undefined=uxTopUsedPriority
@@ -60,8 +63,7 @@ BUILD_BASE_DIR          ?= build
 DEFAULT_BUILD_TARGET    ?= $(PROJECT_NAME)
 
 # Configure how image is programmed to target device
-PROGRAM_IMAGE           ?= $(BUILD_DIR)/$(PROJECT_NAME).bin
-PROGRAM_DEST_ADDR       ?= $(APP_START)
+PROGRAM_DEST_ADDR       ?= 0
 
 # Flash header
 FHEADER_DEST_ADDR        = $(FLASH_HEADER_LOC)
