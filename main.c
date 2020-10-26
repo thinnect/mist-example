@@ -129,17 +129,23 @@ static void main_loop ()
     // Switch to a thread-safe logger
     basic_rtos_logger_setup();
 
-    am_addr_t node_addr = DEFAULT_AM_ADDR;
+    am_addr_t node_addr = NODE_AM_ADDR;
     // Initialize node signature - get address and EUI64
-    if (SIG_GOOD == sigInit())
+
+    if (SIG_GOOD != sigInit())
     {
-        node_addr = sigGetNodeId();
-        sigGetEui64(g_eui.data);
+        warn1("sig");
     }
-    else
+
+    if ((0 != node_addr)&&(0xFFFF != node_addr)) // Override sig if NODE_AM_ADDR set
     {
         uint8_t eui[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, node_addr >> 8, node_addr};
         eui64_set(&g_eui, eui);
+    }
+    else
+    {
+        node_addr = sigGetNodeId();
+        sigGetEui64(g_eui.data);
     }
     infob1("ADDR:%" PRIX16 " EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
 

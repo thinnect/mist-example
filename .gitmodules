@@ -1,7 +1,7 @@
 [submodule "zoo/thinnect.node-buildsystem"]
 	path = zoo/thinnect.node-buildsystem
 	url = https://github.com/thinnect/node-buildsystem.git
-	branch = master
+	branch = flash_header
 [submodule "zoo/thinnect.node-platform"]
 	path = zoo/thinnect.node-platform
 	url = https://github.com/thinnect/node-platform.git
@@ -73,4 +73,4 @@
 [submodule "zoo/thinnect.hiot-platforms"]
 	path = zoo/thinnect.hiot-platforms
 	url = git@github.com:thinnect/hiot-platforms.git
-	branch = trgt_change
+	branch = flash_header

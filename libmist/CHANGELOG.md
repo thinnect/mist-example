@@ -8,6 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [future] - (unreleased)
 
+## [0.4.3] - 2020-10-26
+
+### Added
+- Support for settings block, passed with input.
+- Metadata request handling.
+- Output constraint checking.
+
 ## [0.4.2] - 2020-10-13
 
 ### Fixed
