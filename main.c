@@ -25,6 +25,7 @@
 #include "DeviceSignature.h"
 
 #include "time_rtc.h"
+#include "watchdog.h"
 
 #include "radio.h"
 #ifdef INCLUDE_BEATSTACK
@@ -202,6 +203,10 @@ static void main_loop ()
 int main ()
 {
     PLATFORM_Init();
+
+    // Disable watchdog in the example application.
+    // Enable and feed watchdog in release applications.
+    watchdog_disable();
 
     // LEDs
     PLATFORM_LedsInit();
