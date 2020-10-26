@@ -205,7 +205,7 @@ int main ()
     PLATFORM_Init();
 
     // Disable watchdog in the example application.
-    // Enable and feed watchdog in realease applications.
+    // Enable and feed watchdog in release applications.
     watchdog_disable();
 
     // LEDs
