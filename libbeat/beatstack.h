@@ -12,7 +12,6 @@
 #include <stdint.h>
 
 #include "mist_comm.h"
-#include "FSRecord.h"
 
 /**
  * Callback function for netowork time offset changes.
@@ -44,15 +43,14 @@ typedef struct
  * @param radio_address - the 16-bit AM radio address.
  * @param base - base communications layer that beatstack will use.
  * @param nwtc - Callback function to be called on network time changes.
+ * @param file_sys_nr - File system number.
  *
  * @return A comms layer.
  */
 comms_layer_t * beatstack_create (uint16_t radio_address,
                                   comms_layer_t * base,
                                   nw_time_changed_f nwtc,
-                                  int partition,
-                                  fs_write_record_f fs_w,
-                                  fs_read_record_f fs_r);
+                                  int file_sys_nr);
 
 // -----------------------------------------------------------------------------
 
@@ -105,16 +103,12 @@ beatstack_queue_sizes_t * beatstack_queue_sizes ();
  *
  * @param radio_address - the 16-bit AM radio address.
  * @param nwtc - Callback function to be called on network time changes.
- * @param partition - File system partition number.
- * @param fs_w - Callback function to write data to flash.
- * @param fs_w - Callback function to read data from flash.
+ * @param file_sys_nr - File system number.
  *
  * @return A comms layer.
  */
 comms_layer_t * beatstack_init (uint16_t radio_address,
                                 nw_time_changed_f nwtc,
-                                int partition, 
-                                fs_write_record_f fs_w,
-                                fs_read_record_f fs_r);
+                                int file_sys_nr);
 
 #endif//BEATSTACK_H_

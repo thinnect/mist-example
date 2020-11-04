@@ -94,9 +94,7 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
     m_beat_comm = beatstack_create(node_addr,               \
                                    m_radio_comm,            \
                                    basic_nw_time_changed,   \
-                                   FS_USER_DATA_PARTITION,  \
-                                   fs_write_record,         \
-                                   fs_read_record);
+                                   FS_USER_DATA_PARTITION);
     if (NULL == m_beat_comm)
     {
         err1("bs start"); // TODO remove once sys_panic learns to log
