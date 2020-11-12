@@ -53,7 +53,7 @@
 #include "log.h"
 #include "sys_panic.h"
 
-#define FS_SPIFFS_DATA_PARTITION 2
+#define USER_FILE_SYS_NR 0
 
 #define DEVICE_ANNOUNCEMENT_PERIOD_S 300
 
@@ -89,7 +89,10 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
 
 #ifdef INCLUDE_BEATSTACK
     info1("Starting multi-hop");
-    m_beat_comm = beatstack_create(node_addr, m_radio_comm, basic_nw_time_changed);
+    m_beat_comm = beatstack_create(node_addr,               \
+                                   m_radio_comm,            \
+                                   basic_nw_time_changed,   \
+                                   USER_FILE_SYS_NR);
     if (NULL == m_beat_comm)
     {
         err1("bs start"); // TODO remove once sys_panic learns to log
