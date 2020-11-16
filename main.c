@@ -180,9 +180,21 @@ static void main_loop ()
     mist_middleware_init(radio);
 
     // Initialize the mist-example applications that register handlers
-    mist_mod_lighting_init();
-    mist_mod_movement_init();
-    mist_mod_button_init();
+    #ifdef EXAMPLE_MIST_LIGHT_CONTROL
+        mist_mod_lighting_init();
+    #endif// EXAMPLE_MIST_LIGHT_CONTROL
+
+    #ifdef EXAMPLE_MIST_MOVEMENT
+        mist_mod_movement_init();
+    #endif//EXAMPLE_MIST_MOVEMENT
+
+    #ifdef EXAMPLE_MIST_BUTTON
+        mist_mod_button_init();
+    #endif//EXAMPLE_MIST_BUTTON
+
+    #ifdef EXAMPLE_MIST_LUX
+        mist_mod_lux_init();
+    #endif//EXAMPLE_MIST_LUX
 
     // All registrations should be done now, start middleware
     mist_error_t merr = mist_middleware_start();

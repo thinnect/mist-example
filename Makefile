@@ -100,11 +100,33 @@ NODE_PLATFORM_DIR       := $(ZOO)/thinnect.node-platform
 # ______________ Build components - sources and includes _______________________
 
 SOURCES += main.c
-SOURCES += mist_mod_lighting.c
-SOURCES += mist_mod_movement.c
-SOURCES += mist_mod_button.c
+
 SOURCES += dummy_node_coordinates.c
 #SOURCES += FreeRTOS-openocd.c hardfault.c stackoverflow.c
+
+MIST_LIGHT_CONTROL ?= 1
+ifneq ($(MIST_LIGHT_CONTROL),0)
+  CFLAGS += -DEXAMPLE_MIST_LIGHT_CONTROL
+  SOURCES += mist_mod_lighting.c
+endif
+
+MIST_MOVEMENT ?= 1
+ifneq ($(MIST_MOVEMENT),0)
+  CFLAGS += -DEXAMPLE_MIST_MOVEMENT
+  SOURCES += mist_mod_movement.c
+endif
+
+MIST_BUTTON ?= 0
+ifneq ($(MIST_BUTTON),0)
+  CFLAGS += -DEXAMPLE_MIST_BUTTON
+  SOURCES += mist_mod_button.c
+endif
+
+MIST_LUX ?= 1
+ifneq ($(MIST_LUX),0)
+  CFLAGS += -DEXAMPLE_MIST_LUX
+  SOURCES += mist_mod_lux.c
+endif
 
 # FreeRTOS
 FREERTOS_DIR ?= $(ZOO)/FreeRTOS-Kernel
@@ -237,6 +259,7 @@ SOURCES += $(NODE_PLATFORM_DIR)/common/ident_parameters.c
 INCLUDES += -I$(NODE_PLATFORM_DIR)/include/silabs
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/radio_rtos.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargetspi.c
+SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargeti2c.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 
 # mist library

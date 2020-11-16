@@ -1,5 +1,5 @@
 /**
- * Basic example for setting up a half-simulated lighting controller.
+ * Basic example for setting up a half-simulated movement sensor.
  *
  * Copyright Thinnect Inc. 2020
  * @license MIT
