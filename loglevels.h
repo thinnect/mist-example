@@ -14,6 +14,8 @@
 
 #define LOG_LEVEL_deviceannouncement             LOG_LEVEL_DEBUG
 
+#define LOG_LEVEL_basic_rtos_threads_stats       LOG_LEVEL_DEBUG
+
 //#define LOG_LEVEL_radio                          LOG_LEVEL_DEBUG
 
 #endif//LOGLEVELS_H_
