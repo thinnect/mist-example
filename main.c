@@ -181,18 +181,22 @@ static void main_loop ()
 
     // Initialize the mist-example applications that register handlers
     #ifdef EXAMPLE_MIST_LIGHT_CONTROL
+        #pragma message "EXAMPLE_MIST_LIGHT_CONTROL"
         mist_mod_lighting_init();
     #endif// EXAMPLE_MIST_LIGHT_CONTROL
 
     #ifdef EXAMPLE_MIST_MOVEMENT
+        #pragma message "EXAMPLE_MIST_MOVEMENT"
         mist_mod_movement_init();
     #endif//EXAMPLE_MIST_MOVEMENT
 
     #ifdef EXAMPLE_MIST_BUTTON
+        #pragma message "EXAMPLE_MIST_BUTTON"
         mist_mod_button_init();
     #endif//EXAMPLE_MIST_BUTTON
 
     #ifdef EXAMPLE_MIST_LUX
+        #pragma message "EXAMPLE_MIST_LUX"
         mist_mod_lux_init();
     #endif//EXAMPLE_MIST_LUX
 
