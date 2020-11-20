@@ -10,6 +10,7 @@
 #include <inttypes.h>
 
 #include "platform.h"
+#include "platform_eui.h"
 
 #include "retargetserial.h"
 #include "retargetspi.h"
@@ -162,6 +163,10 @@ static void main_loop ()
         sigGetEui64(g_eui.data);
     }
     infob1("ADDR:%" PRIX16 " EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
+
+    uint8_t mcu_eui[IEEE_EUI64_LENGTH];
+    platform_eui(mcu_eui);
+    infob1("MCU EUI64:", mcu_eui, IEEE_EUI64_LENGTH);
 
     time_rtc_init();
 
