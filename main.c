@@ -29,6 +29,7 @@
 
 #include "radio.h"
 #ifdef INCLUDE_BEATSTACK
+#include "license_rcvr.h"
 #include "beatstack.h"
 #include "basic_rtos_beatstack_timesync.h"
 #endif
@@ -47,13 +48,15 @@
 #include "mist_middleware.h"
 #include "mist_example.h"
 
+#include "basic_rtos_threads_stats.h"
+
 #include "loglevels.h"
 #define __MODUUL__ "main"
 #define __LOG_LEVEL__ (LOG_LEVEL_main & BASE_LOG_LEVEL)
 #include "log.h"
 #include "sys_panic.h"
 
-#define FS_SPIFFS_DATA_PARTITION 2
+#define USER_FILE_SYS_NR 0
 
 #define DEVICE_ANNOUNCEMENT_PERIOD_S 300
 
@@ -89,7 +92,10 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
 
 #ifdef INCLUDE_BEATSTACK
     info1("Starting multi-hop");
-    m_beat_comm = beatstack_create(node_addr, m_radio_comm, basic_nw_time_changed);
+    m_beat_comm = beatstack_create(node_addr,               \
+                                   m_radio_comm,            \
+                                   basic_nw_time_changed,   \
+                                   USER_FILE_SYS_NR);
     if (NULL == m_beat_comm)
     {
         err1("bs start"); // TODO remove once sys_panic learns to log
@@ -100,6 +106,13 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
     eui64_set(&(m_beat_comm->eui), eui); // TODO this should have an API
 
     radio = m_beat_comm;
+
+    static comms_sleep_controller_t rctrl;
+    static lic_rcvr_t lic;
+    if (false == license_rcvr_init(m_radio_comm, &lic, &rctrl))
+    {
+        err1("!license_rcvr");
+    }
 #else
     info1("Starting single-hop");
     radio = m_radio_comm;
@@ -211,6 +224,7 @@ static void main_loop ()
     // Loop forever, printing uptime
     for (;;)
     {
+        basic_rtos_threads_stats();
         info1("uptime: %u unix_time: %u", (unsigned int)osCounterGetSecond(), (unsigned int)time(NULL));
         osDelay(60000);
     }
@@ -248,7 +262,7 @@ int main ()
     DMADRV_Init();
 
     // Create a thread
-    const osThreadAttr_t thread_attr = {.name = "main"};
+    const osThreadAttr_t thread_attr = {.name = "main", .stack_size = 1536};
     osThreadNew(main_loop, NULL, &thread_attr);
 
     if (osKernelReady == osKernelGetState())

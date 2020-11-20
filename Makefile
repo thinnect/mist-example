@@ -19,7 +19,7 @@ DEFAULT_PAN_ID          ?= 0x22
 INCLUDE_BOOTLOADER ?= 0
 
 #include beatstack
-INCLUDE_BEATSTACK	 ?= 0
+INCLUDE_BEATSTACK	 ?= 1
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
@@ -35,6 +35,7 @@ endif
 CFLAGS                  += -Wall -std=c99
 CFLAGS                  += -ffunction-sections -fdata-sections -ffreestanding -fsingle-precision-constant -Wstrict-aliasing=0
 CFLAGS                  += -DconfigUSE_TICKLESS_IDLE=0
+CFLAGS                  += -DUSE_CMSIS_OS2
 CFLAGS                  += -D__START=main -D__STARTUP_CLEAR_BSS
 CFLAGS                  += -DVTOR_START_LOCATION=$(APP_START) -Wl,--section-start=.text=$(APP_START)
 LDFLAGS                 += -nostartfiles -Wl,--gc-sections -Wl,--relax -Wl,-Map=$(@:.elf=.map),--cref -Wl,--wrap=atexit
@@ -44,7 +45,7 @@ LDLIBS                  += -lgcc
 INCLUDES                += -Xassembler -I$(BUILD_DIR) -I.
 
 # If set, disables asserts and debugging, enables optimization
-RELEASE_BUILD           ?= 0
+RELEASE_BUILD           ?= 1
 
 # Set the lll verbosity base level
 CFLAGS                  += -DBASE_LOG_LEVEL=0xFFFF
@@ -102,7 +103,6 @@ NODE_PLATFORM_DIR       := $(ZOO)/thinnect.node-platform
 SOURCES += main.c
 
 SOURCES += dummy_node_coordinates.c
-#SOURCES += FreeRTOS-openocd.c hardfault.c stackoverflow.c
 
 MIST_LIGHT_CONTROL ?= 1
 ifneq ($(MIST_LIGHT_CONTROL),0)
@@ -179,6 +179,7 @@ SOURCES += \
     $(SILABS_SDKDIR)/platform/emlib/src/em_rtcc.c \
     $(SILABS_SDKDIR)/platform/emlib/src/em_timer.c \
     $(SILABS_SDKDIR)/platform/emlib/src/em_wdog.c \
+    $(SILABS_SDKDIR)/platform/emlib/src/em_se.c \
     $(SILABS_SDKDIR)/platform/emdrv/sleep/src/sleep.c \
     $(SILABS_SDKDIR)/platform/emdrv/dmadrv/src/dmadrv.c \
     $(SILABS_SDKDIR)/platform/radio/rail_lib/hal/hal_common.c
@@ -198,6 +199,7 @@ INCLUDES += -I$(ZOO)/thinnect.lll/logging
 INCLUDES += -I$(NODE_PLATFORM_DIR)/widgets
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_filesystem_setup.c
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_logger_setup.c
+SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_threads_stats.c
 
 # device signature
 INCLUDES += -I$(ZOO)/thinnect.device-signature/signature \
@@ -265,7 +267,6 @@ SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/
 LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
-
 
 #beatsack
 ifeq ("$(INCLUDE_BEATSTACK)", "1")
