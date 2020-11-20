@@ -103,6 +103,6 @@ void mist_mod_movement_init()
 	}
 
 	// Create a thread to poll fake movement detector
-	const osThreadAttr_t thread_attr = { .name = "pir" };
+	const osThreadAttr_t thread_attr = { .name = "pir", .stack_size = 2048 };
 	osThreadNew(movement_detector_simulation_thread, NULL, &thread_attr);
 }

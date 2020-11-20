@@ -119,6 +119,6 @@ void mist_mod_lux_init()
 		err1("mist reg %d", result);
 	}
 
-	const osThreadAttr_t thread_attr = { .name = "lux" };
+	const osThreadAttr_t thread_attr = { .name = "lux", .stack_size = 2048 };
 	osThreadNew(light_sensor_thread, NULL, &thread_attr);
 }
