@@ -271,12 +271,14 @@ LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 #beatsack
 ifeq ("$(INCLUDE_BEATSTACK)", "1")
     ifneq ("$(wildcard libbeat/beatstack.h)","")
-           $(info "libbeat found and included")
-           INCLUDES += -I$(ROOT_DIR)/libbeat/
-           LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
-           SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_beatstack_timesync.c
+        $(info "libbeat found and included")
+        INCLUDES += -I$(ROOT_DIR)/libbeat/
+        LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+        SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_beatstack_timesync.c
     else
-           $(warning "Warning: libbeat enabled but not found")
+        ifneq ($(MAKECMDGOALS),clean)
+            $(error "ERROR: libbeat enabled but not found")
+        endif
     endif
 endif
 
