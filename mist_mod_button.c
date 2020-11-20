@@ -116,6 +116,6 @@ void mist_mod_button_init()
 	}
 
 	// Create a thread to simulate button presses
-	const osThreadAttr_t thread_attr = { .name = "but" };
+	const osThreadAttr_t thread_attr = { .name = "but", .stack_size = 2048 };
 	osThreadNew(button_simulation_thread, NULL, &thread_attr);
 }

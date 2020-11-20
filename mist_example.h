@@ -10,5 +10,6 @@
 void mist_mod_lighting_init();
 void mist_mod_movement_init();
 void mist_mod_button_init();
+void mist_mod_lux_init();
 
 #endif//MIST_EXAMPLE_H_

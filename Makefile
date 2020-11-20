@@ -19,7 +19,7 @@ DEFAULT_PAN_ID          ?= 0x22
 INCLUDE_BOOTLOADER ?= 0
 
 #include beatstack
-INCLUDE_BEATSTACK	 ?= 0
+INCLUDE_BEATSTACK	 ?= 1
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
@@ -35,6 +35,7 @@ endif
 CFLAGS                  += -Wall -std=c99
 CFLAGS                  += -ffunction-sections -fdata-sections -ffreestanding -fsingle-precision-constant -Wstrict-aliasing=0
 CFLAGS                  += -DconfigUSE_TICKLESS_IDLE=0
+CFLAGS                  += -DUSE_CMSIS_OS2
 CFLAGS                  += -D__START=main -D__STARTUP_CLEAR_BSS
 CFLAGS                  += -DVTOR_START_LOCATION=$(APP_START) -Wl,--section-start=.text=$(APP_START)
 LDFLAGS                 += -nostartfiles -Wl,--gc-sections -Wl,--relax -Wl,-Map=$(@:.elf=.map),--cref -Wl,--wrap=atexit
@@ -44,7 +45,7 @@ LDLIBS                  += -lgcc
 INCLUDES                += -Xassembler -I$(BUILD_DIR) -I.
 
 # If set, disables asserts and debugging, enables optimization
-RELEASE_BUILD           ?= 0
+RELEASE_BUILD           ?= 1
 
 # Set the lll verbosity base level
 CFLAGS                  += -DBASE_LOG_LEVEL=0xFFFF
@@ -100,11 +101,32 @@ NODE_PLATFORM_DIR       := $(ZOO)/thinnect.node-platform
 # ______________ Build components - sources and includes _______________________
 
 SOURCES += main.c
-SOURCES += mist_mod_lighting.c
-SOURCES += mist_mod_movement.c
-SOURCES += mist_mod_button.c
+
 SOURCES += dummy_node_coordinates.c
-#SOURCES += FreeRTOS-openocd.c hardfault.c stackoverflow.c
+
+MIST_LIGHT_CONTROL ?= 1
+ifneq ($(MIST_LIGHT_CONTROL),0)
+  CFLAGS += -DEXAMPLE_MIST_LIGHT_CONTROL
+  SOURCES += mist_mod_lighting.c
+endif
+
+MIST_MOVEMENT ?= 1
+ifneq ($(MIST_MOVEMENT),0)
+  CFLAGS += -DEXAMPLE_MIST_MOVEMENT
+  SOURCES += mist_mod_movement.c
+endif
+
+MIST_BUTTON ?= 0
+ifneq ($(MIST_BUTTON),0)
+  CFLAGS += -DEXAMPLE_MIST_BUTTON
+  SOURCES += mist_mod_button.c
+endif
+
+MIST_LUX ?= 0
+ifneq ($(MIST_LUX),0)
+  CFLAGS += -DEXAMPLE_MIST_LUX
+  SOURCES += mist_mod_lux.c
+endif
 
 # FreeRTOS
 FREERTOS_DIR ?= $(ZOO)/FreeRTOS-Kernel
@@ -157,6 +179,7 @@ SOURCES += \
     $(SILABS_SDKDIR)/platform/emlib/src/em_rtcc.c \
     $(SILABS_SDKDIR)/platform/emlib/src/em_timer.c \
     $(SILABS_SDKDIR)/platform/emlib/src/em_wdog.c \
+    $(SILABS_SDKDIR)/platform/emlib/src/em_se.c \
     $(SILABS_SDKDIR)/platform/emdrv/sleep/src/sleep.c \
     $(SILABS_SDKDIR)/platform/emdrv/dmadrv/src/dmadrv.c \
     $(SILABS_SDKDIR)/platform/radio/rail_lib/hal/hal_common.c
@@ -176,6 +199,7 @@ INCLUDES += -I$(ZOO)/thinnect.lll/logging
 INCLUDES += -I$(NODE_PLATFORM_DIR)/widgets
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_filesystem_setup.c
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_logger_setup.c
+SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_threads_stats.c
 
 # device signature
 INCLUDES += -I$(ZOO)/thinnect.device-signature/signature \
@@ -237,22 +261,24 @@ SOURCES += $(NODE_PLATFORM_DIR)/common/ident_parameters.c
 INCLUDES += -I$(NODE_PLATFORM_DIR)/include/silabs
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/radio_rtos.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargetspi.c
+SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargeti2c.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/
 LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 
-
 #beatsack
 ifeq ("$(INCLUDE_BEATSTACK)", "1")
     ifneq ("$(wildcard libbeat/beatstack.h)","")
-           $(info "libbeat found and included")
-           INCLUDES += -I$(ROOT_DIR)/libbeat/
-           LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
-           SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_beatstack_timesync.c
+        $(info "libbeat found and included")
+        INCLUDES += -I$(ROOT_DIR)/libbeat/
+        LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+        SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_beatstack_timesync.c
     else
-           $(warning "Warning: libbeat enabled but not found")
+        ifneq ($(MAKECMDGOALS),clean)
+            $(error "ERROR: libbeat enabled but not found")
+        endif
     endif
 endif
 

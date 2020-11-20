@@ -10,6 +10,7 @@
 #include <inttypes.h>
 
 #include "platform.h"
+#include "platform_eui.h"
 
 #include "retargetserial.h"
 #include "retargetspi.h"
@@ -29,6 +30,7 @@
 
 #include "radio.h"
 #ifdef INCLUDE_BEATSTACK
+#include "license_rcvr.h"
 #include "beatstack.h"
 #include "basic_rtos_beatstack_timesync.h"
 #endif
@@ -46,6 +48,8 @@
 
 #include "mist_middleware.h"
 #include "mist_example.h"
+
+#include "basic_rtos_threads_stats.h"
 
 #include "loglevels.h"
 #define __MODUUL__ "main"
@@ -103,6 +107,13 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
     eui64_set(&(m_beat_comm->eui), eui); // TODO this should have an API
 
     radio = m_beat_comm;
+
+    static comms_sleep_controller_t rctrl;
+    static lic_rcvr_t lic;
+    if (false == license_rcvr_init(m_radio_comm, &lic, &rctrl))
+    {
+        err1("!license_rcvr");
+    }
 #else
     info1("Starting single-hop");
     radio = m_radio_comm;
@@ -153,6 +164,10 @@ static void main_loop ()
     }
     infob1("ADDR:%" PRIX16 " EUI64:", g_eui.data, sizeof(g_eui.data), node_addr);
 
+    uint8_t mcu_eui[IEEE_EUI64_LENGTH];
+    platform_eui(mcu_eui);
+    infob1("MCU EUI64:", mcu_eui, IEEE_EUI64_LENGTH);
+
     time_rtc_init();
 
     // Initialize SPI flash filesystem
@@ -183,9 +198,25 @@ static void main_loop ()
     mist_middleware_init(radio);
 
     // Initialize the mist-example applications that register handlers
-    mist_mod_lighting_init();
-    mist_mod_movement_init();
-    mist_mod_button_init();
+    #ifdef EXAMPLE_MIST_LIGHT_CONTROL
+        #pragma message "EXAMPLE_MIST_LIGHT_CONTROL"
+        mist_mod_lighting_init();
+    #endif// EXAMPLE_MIST_LIGHT_CONTROL
+
+    #ifdef EXAMPLE_MIST_MOVEMENT
+        #pragma message "EXAMPLE_MIST_MOVEMENT"
+        mist_mod_movement_init();
+    #endif//EXAMPLE_MIST_MOVEMENT
+
+    #ifdef EXAMPLE_MIST_BUTTON
+        #pragma message "EXAMPLE_MIST_BUTTON"
+        mist_mod_button_init();
+    #endif//EXAMPLE_MIST_BUTTON
+
+    #ifdef EXAMPLE_MIST_LUX
+        #pragma message "EXAMPLE_MIST_LUX"
+        mist_mod_lux_init();
+    #endif//EXAMPLE_MIST_LUX
 
     // All registrations should be done now, start middleware
     mist_error_t merr = mist_middleware_start();
@@ -198,6 +229,7 @@ static void main_loop ()
     // Loop forever, printing uptime
     for (;;)
     {
+        basic_rtos_threads_stats();
         info1("uptime: %u unix_time: %u", (unsigned int)osCounterGetSecond(), (unsigned int)time(NULL));
         osDelay(60000);
     }
@@ -235,7 +267,7 @@ int main ()
     DMADRV_Init();
 
     // Create a thread
-    const osThreadAttr_t thread_attr = {.name = "main"};
+    const osThreadAttr_t thread_attr = {.name = "main", .stack_size = 1536};
     osThreadNew(main_loop, NULL, &thread_attr);
 
     if (osKernelReady == osKernelGetState())

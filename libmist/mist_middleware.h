@@ -1,6 +1,14 @@
 /**
  * Mist middleware management API.
  *
+ * Common setup:
+ * Initialize: mist_middleware_init(RADIO)
+ * Register handlers: mist_register_handler(A_HANDLER)
+ * Start: mist_middleware_start()
+ *
+ * Stored rules are loaded on start, so handlers must be registered before
+ * start, otherwise stored rules are not lost.
+ *
  * Copyright Thinnect Inc. 2020
  * @license <PROPRIETARY>
  */
