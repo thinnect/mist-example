@@ -122,7 +122,7 @@ ifneq ($(MIST_BUTTON),0)
   SOURCES += mist_mod_button.c
 endif
 
-MIST_LUX ?= 1
+MIST_LUX ?= 0
 ifneq ($(MIST_LUX),0)
   CFLAGS += -DEXAMPLE_MIST_LUX
   SOURCES += mist_mod_lux.c
