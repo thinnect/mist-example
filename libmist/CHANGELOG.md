@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [future] - (unreleased)
 
+## [0.4.6] - 2020-12-10
+
+### Added
+- Some new return values (MIST_ETIMEOUT, MIST_ESIZE, etc).
+
+### Changed
+- Spontaneous event calls now use less stack space.
+- Data only sent to broadcast if multiple destinations or resource.
+- Backoff management for spontaneous events (0, 10, 30, 70, 150, 300).
+
+## [0.4.5] - 2020-11-21
+
+### Fixed
+- Some complex input rules being executed too often.
+
 ## [0.4.4] - 2020-11-20
 
 ### Added

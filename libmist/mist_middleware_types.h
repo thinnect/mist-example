@@ -14,9 +14,13 @@
  */
 typedef enum mist_error
 {
-	MIST_ERR_PRIORITY = -2,
-	MIST_FAIL = -1,
-	MIST_SUCCESS = 0
+	MIST_ERR_PRIORITY = -20, // Internal type, TODO fix naming scheme
+	MIST_ETIMEOUT     = -12,
+	MIST_ERETRY       =  -7,
+	MIST_EBUSY        =  -5,
+	MIST_ESIZE        =  -2,
+	MIST_FAIL         =  -1,
+	MIST_SUCCESS      =   0
 } mist_error_t;
 
 /**
