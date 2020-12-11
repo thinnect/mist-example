@@ -9,6 +9,11 @@ VERSION_MINOR           ?= 0
 VERSION_PATCH           ?= 0
 VERSION_DEVEL           ?= "-dev"
 
+# Include some optional configuration when requested
+CONFIG ?= normal
+$(info CONFIG=$(CONFIG))
+include config/$(CONFIG).mk
+
 DEFAULT_RADIO_CHANNEL   ?= 16
 
 # Set device address at compile time, will override signature when != 0

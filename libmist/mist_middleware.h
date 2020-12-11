@@ -59,7 +59,7 @@ typedef mist_error_t (*mist_action_function_f) (
  * Mist middleware action module structure. Must be filled for registration.
  *
  * @param data_type - Type of the data provided by the module (dt_types).
- * @param uuid - When a resource type, fill with resource ID, set to zeros otherwise.
+ * @param uuid      - When a resource type, fill with resource ID, set to zeros otherwise.
  * @param function  - Action fuction to be called to execute control and/or read data.
  */
 typedef struct mist_module {
