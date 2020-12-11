@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [future] - (unreleased)
 
+## [0.4.7] - 2020-12-11
+
+### Changed
+- Backoff management for spontaneous events (0, 10, 30, 70, 120).
+
 ## [0.4.6] - 2020-12-10
 
 ### Added
