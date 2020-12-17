@@ -6,7 +6,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [future] - (unreleased)
+## [0.4.8] - 2020-12-17
+
+### Changed
+- Mist rule maintenance period increased from 5 minutes to 15 minutes.
+
+### Added
+- Function for configuring spontaneous event backoff.
+
+### Fixed
+- Started event not sent immediately when rule started.
 
 ## [0.4.7] - 2020-12-11
 
