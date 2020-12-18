@@ -200,31 +200,46 @@ static void main_loop ()
     // Initialize the mist-example applications that register handlers
     #ifdef EXAMPLE_MIST_LIGHT_CONTROL
         #pragma message "EXAMPLE_MIST_LIGHT_CONTROL"
-        mist_mod_lighting_init();
+        if ( ! mist_mod_lighting_init())
+        {
+            err1("light init");
+        }
     #endif// EXAMPLE_MIST_LIGHT_CONTROL
 
     #ifdef EXAMPLE_MIST_MOVEMENT
         #pragma message "EXAMPLE_MIST_MOVEMENT"
-        mist_mod_movement_init();
+        if ( ! mist_mod_movement_init())
+        {
+            err1("mov init");
+        }
     #endif//EXAMPLE_MIST_MOVEMENT
 
     #ifdef EXAMPLE_MIST_BUTTON
         #pragma message "EXAMPLE_MIST_BUTTON"
-        mist_mod_button_init();
+        if ( ! mist_mod_button_init())
+        {
+            err1("button init");
+        }
     #endif//EXAMPLE_MIST_BUTTON
 
     #ifdef EXAMPLE_MIST_LUX
         #pragma message "EXAMPLE_MIST_LUX"
-        mist_mod_lux_init();
+        if ( ! mist_mod_lux_init())
+        {
+            err1("lux init");
+        }
     #endif//EXAMPLE_MIST_LUX
 
     // All registrations should be done now, start middleware
     mist_error_t merr = mist_middleware_start();
-    if(MIST_SUCCESS != merr)
+    if (MIST_SUCCESS == merr)
+    {
+        debug1("mist rdy");
+    }
+    else
     {
         err1("merr %d", merr);
     }
-    debug1("mist rdy");
 
     // Loop forever, printing uptime
     for (;;)

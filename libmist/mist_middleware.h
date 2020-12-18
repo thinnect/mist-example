@@ -127,4 +127,17 @@ mist_error_t mist_middleware_start();
  */
 mist_error_t mist_spontaneous_event(mist_module_t * module, mist_item_type_t itype, void * data, uint16_t length);
 
+/**
+ * Configure spontaneous event backoff for an action handler.
+ *
+ * @param module - pointer to an already registered module.
+ * @param minimum_s - Minimum backoff value.
+ * @param maximum_s - Maximum backoff value.
+ * @param step_s - Backoff step value. `backoff = MAX(step_s * ((1 << events) - 1), minimum_s)`
+ *
+ * @return MIST_SUCCESS when configured.
+ */
+mist_error_t mist_configure_spontaneous_event_backoff(mist_module_t * module,
+                                                      uint16_t minimum_s, uint16_t maximum_s, uint16_t step_s);
+
 #endif//MIST_MIDDLEWARE_H_

@@ -246,7 +246,7 @@ static mist_error_t light_control(
 }
 
 
-void mist_mod_lighting_init()
+bool mist_mod_lighting_init()
 {
 	// Register lighting control
 	m_lighting_module.data_type = dt_light_control;
@@ -257,5 +257,7 @@ void mist_mod_lighting_init()
 	if (MIST_SUCCESS != result)
 	{
 		err1("mist reg %d", result);
+		return false;
 	}
+	return true;
 }
