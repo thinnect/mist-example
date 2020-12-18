@@ -89,7 +89,7 @@ static void movement_detector_simulation_thread(void * arg)
 	}
 }
 
-void mist_mod_movement_init()
+bool mist_mod_movement_init()
 {
 	// Register movement sensor
 	m_movement_module.data_type = dt_movement_count;
@@ -100,9 +100,15 @@ void mist_mod_movement_init()
 	if (MIST_SUCCESS != result)
 	{
 		err1("mist reg %d", result);
+		return false;
 	}
 
 	// Create a thread to poll fake movement detector
-	const osThreadAttr_t thread_attr = { .name = "pir", .stack_size = 2048 };
-	osThreadNew(movement_detector_simulation_thread, NULL, &thread_attr);
+	const osThreadAttr_t thread_attr = { .name = "pir", .stack_size = 1536 };
+	if (NULL == osThreadNew(movement_detector_simulation_thread, NULL, &thread_attr))
+	{
+		err1("thrd mov");
+		return false;
+	}
+	return true;
 }

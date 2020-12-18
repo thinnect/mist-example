@@ -102,7 +102,7 @@ static void button_simulation_thread(void * arg)
 	}
 }
 
-void mist_mod_button_init()
+bool mist_mod_button_init()
 {
 	// Register button
 	m_button_module.data_type = dt_button;
@@ -113,9 +113,18 @@ void mist_mod_button_init()
 	if (MIST_SUCCESS != result)
 	{
 		err1("mist reg %d", result);
+		return false;
 	}
 
+	// Configure button events to have very little backoff: 0, 1, 3, 7, 10
+	mist_configure_spontaneous_event_backoff(&m_button_module, 1, 1, 10);
+
 	// Create a thread to simulate button presses
-	const osThreadAttr_t thread_attr = { .name = "but", .stack_size = 2048 };
-	osThreadNew(button_simulation_thread, NULL, &thread_attr);
+	const osThreadAttr_t thread_attr = { .name = "but", .stack_size = 1536 };
+	if (NULL == osThreadNew(button_simulation_thread, NULL, &thread_attr))
+	{
+		err1("btn thrd");
+		return false;
+	}
+	return true;
 }

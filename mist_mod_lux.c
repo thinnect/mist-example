@@ -106,7 +106,7 @@ static void light_sensor_thread(void * arg)
 	}
 }
 
-void mist_mod_lux_init()
+bool mist_mod_lux_init()
 {
 	// Register movement sensor
 	m_illuminance_module.data_type = dt_light_lx;
@@ -117,8 +117,14 @@ void mist_mod_lux_init()
 	if (MIST_SUCCESS != result)
 	{
 		err1("mist reg %d", result);
+		return false;
 	}
 
-	const osThreadAttr_t thread_attr = { .name = "lux", .stack_size = 2048 };
-	osThreadNew(light_sensor_thread, NULL, &thread_attr);
+	const osThreadAttr_t thread_attr = { .name = "lux", .stack_size = 1536 };
+	if (NULL == osThreadNew(light_sensor_thread, NULL, &thread_attr))
+	{
+		err1("thrd lux");
+		return false;
+	}
+	return true;
 }

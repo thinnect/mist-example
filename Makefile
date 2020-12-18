@@ -21,19 +21,19 @@ NODE_AM_ADDR            ?= 0
 DEFAULT_PAN_ID          ?= 0x22
 
 #include bootloader
-INCLUDE_BOOTLOADER ?= 0
+INCLUDE_BOOTLOADER      ?= 0
 
 #include beatstack
-INCLUDE_BEATSTACK	 ?= 1
+INCLUDE_BEATSTACK	?= 1
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
 #with current bootloader APP_START should be 0x20000
 ifeq ("$(INCLUDE_BOOTLOADER)", "0")
   APP_START = 0
-  PROGRAM_IMAGE           ?= $(BUILD_DIR)/$(PROJECT_NAME).bin
+  PROGRAM_IMAGE         ?= $(BUILD_DIR)/$(PROJECT_NAME).bin
 else
-  PROGRAM_IMAGE           ?= $(BUILD_DIR)/combo.bin
+  PROGRAM_IMAGE         ?= $(BUILD_DIR)/combo.bin
 endif
 
 # Common build options - some of these should be moved to targets/boards

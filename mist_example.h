@@ -7,9 +7,9 @@
 #ifndef MIST_EXAMPLE_H_
 #define MIST_EXAMPLE_H_
 
-void mist_mod_lighting_init();
-void mist_mod_movement_init();
-void mist_mod_button_init();
-void mist_mod_lux_init();
+bool mist_mod_lighting_init();
+bool mist_mod_movement_init();
+bool mist_mod_button_init();
+bool mist_mod_lux_init();
 
 #endif//MIST_EXAMPLE_H_
