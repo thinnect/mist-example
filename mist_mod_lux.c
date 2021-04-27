@@ -101,7 +101,7 @@ static void light_sensor_thread(void * arg)
 		mist_error_t r = mist_spontaneous_event(&m_illuminance_module, MIST_ITEM_INT32, &m_light_lx, sizeof(int32_t));
 		if (MIST_SUCCESS != r)
 		{
-			warn1("mov spnt evt %d", (int)r); // Something went wrong
+			warn1("light spnt evt %d", (int)r); // Something went wrong
 		}
 	}
 }
@@ -119,6 +119,9 @@ bool mist_mod_lux_init()
 		err1("mist reg %d", result);
 		return false;
 	}
+
+	// Configure lux events to have a max 60 second backoff.
+	mist_configure_spontaneous_event_backoff(&m_illuminance_module, 30, 60, 30);
 
 	const osThreadAttr_t thread_attr = { .name = "lux", .stack_size = 1536 };
 	if (NULL == osThreadNew(light_sensor_thread, NULL, &thread_attr))

@@ -117,7 +117,7 @@ bool mist_mod_button_init()
 	}
 
 	// Configure button events to have very little backoff: 0, 1, 3, 7, 10
-	mist_configure_spontaneous_event_backoff(&m_button_module, 1, 1, 10);
+	mist_configure_spontaneous_event_backoff(&m_button_module, 1, 10, 1);
 
 	// Create a thread to simulate button presses
 	const osThreadAttr_t thread_attr = { .name = "but", .stack_size = 1536 };
