@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [UNRELEASED]
+
+## [0.5.0] - 2021-04-27
+
+### Added
+- Support for additional data types in rules.
+- Support for actively requesting missing rule fragments.
+
+### Changed
+- Rule size now up to 400 bytes.
+- Max 9 rules by default.
+- Multi-fragment transfers must have an XMODEM CRC at the end.
+
+### Fixed
+- Data stream IDs mixed up.
+- subs_identify command now works.
+
 ## [0.4.8] - 2020-12-17
 
 ### Changed

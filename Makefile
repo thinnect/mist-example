@@ -14,7 +14,7 @@ CONFIG ?= normal
 $(info CONFIG=$(CONFIG))
 include config/$(CONFIG).mk
 
-DEFAULT_RADIO_CHANNEL   ?= 16
+DEFAULT_RADIO_CHANNEL   ?= 13
 
 # Set device address at compile time, will override signature when != 0
 NODE_AM_ADDR            ?= 0
@@ -23,8 +23,8 @@ DEFAULT_PAN_ID          ?= 0x22
 #include bootloader
 INCLUDE_BOOTLOADER      ?= 0
 
-#include beatstack
-INCLUDE_BEATSTACK	?= 1
+# Specify beatstack config, single-hop if not set
+LIBBEAT_CONFIG          ?= ""
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
@@ -151,6 +151,7 @@ CMSIS_CONFIG_DIR ?= $(ZOO)/thinnect.cmsis-freertos/$(MCU_ARCH)/config
 
 INCLUDES += -I$(ZOO)/thinnect.cmsis-ext
 SOURCES += $(ZOO)/thinnect.cmsis-ext/cmsis_os2_ext.c
+SOURCES += $(ZOO)/thinnect.cmsis-ext/freertos/cmsis_os2_ext_info.c
 
 # Silabs EMLIB, RAIL, radio
 INCLUDES += \
@@ -224,7 +225,6 @@ INCLUDES += -I$(ZOO)/lammertb.libcrc/include \
             -I$(ZOO)/jtbr.endianness \
             -I$(ZOO)/graphitemaster.incbin
 SOURCES += $(ZOO)/lammertb.libcrc/src/crcccitt.c
-SOURCES += $(ZOO)/lammertb.libcrc/src/crc16.c
 
 # spiffs
 INCLUDES += -I$(ZOO)/pellepl.spiffs/src
@@ -274,12 +274,13 @@ INCLUDES += -I$(ROOT_DIR)/libmist/
 LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 
 #beatsack
-ifeq ("$(INCLUDE_BEATSTACK)", "1")
-    ifneq ("$(wildcard libbeat/beatstack.h)","")
+ifneq ($(LIBBEAT_CONFIG),"")
+    ifneq ("$(wildcard libbeat/$(LIBBEAT_CONFIG)/beatstack.h)","")
         $(info "libbeat found and included")
-        INCLUDES += -I$(ROOT_DIR)/libbeat/
-        LDLIBS += $(ROOT_DIR)/libbeat/$(MCU_FAMILY)/libbeat.a
+        INCLUDES += -I$(ROOT_DIR)/libbeat/$(LIBBEAT_CONFIG)/
+        LDLIBS += $(ROOT_DIR)/libbeat/$(LIBBEAT_CONFIG)/$(MCU_FAMILY)/libbeat.a
         SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_beatstack_timesync.c
+        CFLAGS += -DINCLUDE_BEATSTACK
     else
         ifneq ($(MAKECMDGOALS),clean)
             $(error "ERROR: libbeat enabled but not found")
@@ -321,10 +322,6 @@ $(call passVarToCpp,CFLAGS,IDENT_TIMESTAMP)
 $(call passVarToCpp,CFLAGS,NODE_AM_ADDR)
 $(call passVarToCpp,CFLAGS,DEFAULT_RADIO_CHANNEL)
 $(call passVarToCpp,CFLAGS,DEFAULT_PAN_ID)
-
-ifeq ("$(INCLUDE_BEATSTACK)","1")
-    $(call passVarToCpp,CFLAGS,INCLUDE_BEATSTACK)
-endif
 
 UUID_APPLICATION_BYTES = $(call uuidToCstr,$(UUID_APPLICATION))
 $(call passVarToCpp,CFLAGS,UUID_APPLICATION_BYTES)

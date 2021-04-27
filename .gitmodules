@@ -5,7 +5,7 @@
 [submodule "zoo/thinnect.node-platform"]
 	path = zoo/thinnect.node-platform
 	url = https://github.com/thinnect/node-platform.git
-	branch = newmaster
+	branch = master
 [submodule "zoo/thinnect.node-filesystem"]
 	path = zoo/thinnect.node-filesystem
 	url = https://github.com/thinnect/node-filesystem.git
@@ -34,7 +34,7 @@
 [submodule "zoo/thinnect.cmsis-freertos"]
 	path = zoo/thinnect.cmsis-freertos
 	url = https://github.com/thinnect/cmsis-freertos
-	branch = heap
+	branch = master
 [submodule "zoo/thinnect.cmsis-ext"]
 	path = zoo/thinnect.cmsis-ext
 	url = https://github.com/thinnect/cmsis-ext
