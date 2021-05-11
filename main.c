@@ -230,6 +230,22 @@ static void main_loop ()
         }
     #endif//EXAMPLE_MIST_LUX
 
+    #ifdef EXAMPLE_MIST_ARRAY_PAR
+        #pragma message "EXAMPLE_MIST_ARRAY_PAR"
+        if ( ! mist_mod_array_init(true))
+        {
+            err1("arr p init");
+        }
+    #endif//EXAMPLE_MIST_ARRAY_PAR
+
+    #ifdef EXAMPLE_MIST_ARRAY_SEQ
+        #pragma message "EXAMPLE_MIST_ARRAY_SEQ"
+        if ( ! mist_mod_array_init(false))
+        {
+            err1("arr s init");
+        }
+    #endif//EXAMPLE_MIST_ARRAY_SEQ
+
     // All registrations should be done now, start middleware
     mist_error_t merr = mist_middleware_start();
     if (MIST_SUCCESS == merr)
