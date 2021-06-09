@@ -280,8 +280,12 @@ LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
 ifneq ($(LIBOTA_CONFIG),"")
     ifneq ("$(wildcard libota/updater.h)","")
         $(info libota found and included)
-	      INCLUDES += -I$(ROOT_DIR)/libota/
-	      LDLIBS += $(ROOT_DIR)/libota/$(MCU_FAMILY)/libota.a
+        ifeq ("$(INCLUDE_BOOTLOADER)", "1")
+	          INCLUDES += -I$(ROOT_DIR)/libota/
+	          LDLIBS += $(ROOT_DIR)/libota/$(MCU_FAMILY)/libota.a
+        else
+            $(error "ERROR: ota enabled and included but bootloader missing")
+        endif
     else
 	      ifneq ($(MAKECMDGOALS),clean)
             $(error "ERROR: libota enabled but not found")
