@@ -57,6 +57,11 @@
 #include "log.h"
 #include "sys_panic.h"
 
+
+#ifdef INCLUDE_OTA
+#include "updater.h"
+#endif
+
 #define USER_FILE_SYS_NR 0
 
 #define DEVICE_ANNOUNCEMENT_PERIOD_S 300
@@ -138,7 +143,12 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
     debug1("radio rdy");
     return radio;
 }
+#ifdef INCLUDE_OTA
+static void ota_active(bool status)
+{
 
+}
+#endif
 static void main_loop ()
 {
     // Switch to a thread-safe logger
@@ -183,6 +193,11 @@ static void main_loop ()
         sys_panic("radio");
     }
 
+    #ifdef INCLUDE_OTA
+    uint8_t uuid[16] = {0};
+    sigGetBoardUUID(&uuid);
+    updater_init(radio, NULL, ota_active);
+    #endif
     // Start deviceannouncement application ------------------------------------
     if (0 == announcement_app_init(radio, DEVICE_ANNOUNCEMENT_PERIOD_S))
     {

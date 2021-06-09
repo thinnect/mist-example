@@ -283,6 +283,7 @@ ifneq ($(LIBOTA_CONFIG),"")
         ifeq ("$(INCLUDE_BOOTLOADER)", "1")
 	          INCLUDES += -I$(ROOT_DIR)/libota/
 	          LDLIBS += $(ROOT_DIR)/libota/$(MCU_FAMILY)/libota.a
+            CFLAGS += -DINCLUDE_OTA
         else
             ifneq ($(MAKECMDGOALS),clean)
                 $(error "ERROR: ota enabled and included but bootloader missing")
