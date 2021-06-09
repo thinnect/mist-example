@@ -26,6 +26,9 @@ INCLUDE_BOOTLOADER      ?= 0
 # Specify beatstack config, single-hop if not set
 LIBBEAT_CONFIG          ?= ""
 
+
+LIBOTA_CONFIG          = 0
+
 #app start
 #if bootloader is included APP_START value is retrived from .board file
 #with current bootloader APP_START should be 0x20000
@@ -56,7 +59,7 @@ RELEASE_BUILD           ?= 1
 CFLAGS                  += -DBASE_LOG_LEVEL=0xFFFF
 
 # Enable debug messages
-VERBOSE                 ?= 0
+VERBOSE                 ?= 1
 # Disable info messages
 #SILENT                  ?= 1
 
@@ -272,6 +275,19 @@ SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/
 LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
+
+#libota
+ifneq ($(LIBOTA_CONFIG),"")
+    ifneq ("$(wildcard libota/updater.h)","")
+        $(info libota found and included)
+	      INCLUDES += -I$(ROOT_DIR)/libota/
+	      LDLIBS += $(ROOT_DIR)/libota/$(MCU_FAMILY)/libota.a
+    else
+	      ifneq ($(MAKECMDGOALS),clean)
+            $(error "ERROR: libota enabled but not found")
+        endif
+    endif
+endif
 
 #beatsack
 ifneq ($(LIBBEAT_CONFIG),"")
