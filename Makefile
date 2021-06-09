@@ -59,7 +59,7 @@ RELEASE_BUILD           ?= 1
 CFLAGS                  += -DBASE_LOG_LEVEL=0xFFFF
 
 # Enable debug messages
-VERBOSE                 ?= 1
+VERBOSE                 ?= 0
 # Disable info messages
 #SILENT                  ?= 1
 
