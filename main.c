@@ -196,7 +196,7 @@ static void main_loop ()
     #ifdef INCLUDE_OTA
     uint8_t uuid[16] = {0};
     sigGetBoardUUID(&uuid);
-    updater_init(radio, NULL, ota_active);
+    updater_init(radio, uuid, ota_active);
     #endif
     // Start deviceannouncement application ------------------------------------
     if (0 == announcement_app_init(radio, DEVICE_ANNOUNCEMENT_PERIOD_S))

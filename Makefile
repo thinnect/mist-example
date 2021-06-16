@@ -14,7 +14,7 @@ CONFIG ?= normal
 $(info CONFIG=$(CONFIG))
 include config/$(CONFIG).mk
 
-DEFAULT_RADIO_CHANNEL   ?= 13
+DEFAULT_RADIO_CHANNEL   ?= 20
 
 # Set device address at compile time, will override signature when != 0
 NODE_AM_ADDR            ?= 0
@@ -27,7 +27,7 @@ INCLUDE_BOOTLOADER      ?= 0
 LIBBEAT_CONFIG          ?= ""
 
 
-LIBOTA_CONFIG          = 0
+LIBOTA_CONFIG          = 1
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
@@ -272,6 +272,8 @@ SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargetspi.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargeti2c.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 
+SOURCES += panic_handler.c ### REMOVE THIS FOR SURE
+
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/
 LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
@@ -379,9 +381,9 @@ $(BUILD_DIR)/$(PROJECT_NAME).bin: $(BUILD_DIR)/$(PROJECT_NAME).elf
 	$(HIDE_CMD)$(TC_OBJCOPY) --strip-all -O binary "$<" "$@"
 	$(HIDE_CMD)$(HEADEREDIT) -v size -v crc $@
 
-$(BUILD_DIR)/combo.bin: bootloader/wfs201-bootloader.bin $(BUILD_DIR)/$(PROJECT_NAME).bin
+$(BUILD_DIR)/combo.bin: bootloader/tsb2-dev/bootloader.bin $(BUILD_DIR)/$(PROJECT_NAME).bin
 	$(call pInfo,Building combo [$@])
-	srec_cat bootloader/wfs201-bootloader.bin -binary -offset $(BOOTLOADER_START) \
+	srec_cat bootloader/tsb2-dev/bootloader.bin -binary -offset $(BOOTLOADER_START) \
 	                  $(BUILD_DIR)/$(PROJECT_NAME).bin -binary -offset $(APP_START) \
 	                  -o $@ -binary
 	chmod 755 "$@"
