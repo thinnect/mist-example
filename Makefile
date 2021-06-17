@@ -14,11 +14,11 @@ CONFIG ?= normal
 $(info CONFIG=$(CONFIG))
 include config/$(CONFIG).mk
 
-DEFAULT_RADIO_CHANNEL   ?= 20
+DEFAULT_RADIO_CHANNEL   ?= 12
 
 # Set device address at compile time, will override signature when != 0
 NODE_AM_ADDR            ?= 0
-DEFAULT_PAN_ID          ?= 0x22
+DEFAULT_PAN_ID          ?= 0xFF
 
 #include bootloader
 INCLUDE_BOOTLOADER      ?= 0
@@ -27,7 +27,7 @@ INCLUDE_BOOTLOADER      ?= 0
 LIBBEAT_CONFIG          ?= ""
 
 
-LIBOTA_CONFIG          = 1
+LIBOTA_CONFIG          = 0
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
@@ -209,6 +209,7 @@ INCLUDES += -I$(NODE_PLATFORM_DIR)/widgets
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_filesystem_setup.c
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_logger_setup.c
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_threads_stats.c
+SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_ota_setup.c
 
 # device signature
 INCLUDES += -I$(ZOO)/thinnect.device-signature/signature \
@@ -272,7 +273,7 @@ SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargetspi.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargeti2c.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 
-SOURCES += panic_handler.c ### REMOVE THIS FOR SURE
+SOURCES += panic_handler.c
 
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/
