@@ -6,7 +6,7 @@ PROJECT_NAME            ?= mistexample
 
 VERSION_MAJOR           ?= 1
 VERSION_MINOR           ?= 0
-VERSION_PATCH           ?= 0
+VERSION_PATCH           ?= 1
 VERSION_DEVEL           ?= "-dev"
 
 # Include some optional configuration when requested
@@ -27,7 +27,7 @@ INCLUDE_BOOTLOADER      ?= 0
 LIBBEAT_CONFIG          ?= ""
 
 
-LIBOTA_CONFIG          = 0
+LIBOTA_CONFIG          = 
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
