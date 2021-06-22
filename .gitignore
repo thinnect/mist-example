@@ -1,3 +1,6 @@
 build
 Makefile.private
 libbeat/beatstack.h
+libbeat/
+bootloader/
+libota/

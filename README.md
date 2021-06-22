@@ -74,6 +74,28 @@ Makefile (or Makefile.private) or set on the command line:
 make <PLAFTORM_NAME> INCLUDE_BEATSTACK=1
 ```
 
+# Thinnect OTA (libota)
+
+The example application can be optionally built with the Thinnect mesh update
+layer. The library needs to be obtained separately. The library bundle should
+include a header `updater.h` and the static library `libota.a` for a given
+architecture. These need to be stored as:
+```
+$(WORKSPACE_ROOT)/libota/updater.h
+$(WORKSPACE_ROOT)/libota/updater_fs.h/
+$(WORKSPACE_ROOT)/libota/updater.h/
+$(WORKSPACE_ROOT)/libota/updater_header.h/
+$(WORKSPACE_ROOT)/libota/updater_lib.h
+$(WORKSPACE_ROOT)/libota/$(MCU_ARCH)/libota.a
+```
+
+Additionally LIBOTA_CONFIG needs to be set to 1. This can be done in the
+Makefile (or Makefile.private) or set on the command line:
+
+```
+make <PLAFTORM_NAME> LIBOTA_CONFIG=1
+```
+
 # Setup
 
 This repository relies on several dependencies that are all publically available

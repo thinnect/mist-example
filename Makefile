@@ -4,7 +4,7 @@
 
 PROJECT_NAME            ?= mistexample
 
-VERSION_MAJOR           ?= 1
+VERSION_MAJOR           ?= 2
 VERSION_MINOR           ?= 0
 VERSION_PATCH           ?= 1
 VERSION_DEVEL           ?= "-dev"
@@ -14,7 +14,7 @@ CONFIG ?= normal
 $(info CONFIG=$(CONFIG))
 include config/$(CONFIG).mk
 
-DEFAULT_RADIO_CHANNEL   ?= 13
+DEFAULT_RADIO_CHANNEL   ?= 12
 
 # Set device address at compile time, will override signature when != 0
 NODE_AM_ADDR            ?= 0
@@ -25,6 +25,8 @@ INCLUDE_BOOTLOADER      ?= 0
 
 # Specify beatstack config, single-hop if not set
 LIBBEAT_CONFIG          ?= ""
+
+LIBOTA_CONFIG            = 0
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
@@ -218,7 +220,9 @@ INCLUDES += -I$(NODE_PLATFORM_DIR)/widgets
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_filesystem_setup.c
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_logger_setup.c
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_threads_stats.c
-
+ifneq ($(LIBOTA_CONFIG),"")
+    SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_ota_setup.c
+endif
 # device signature
 INCLUDES += -I$(ZOO)/thinnect.device-signature/signature \
             -I$(ZOO)/thinnect.device-signature/area
@@ -284,6 +288,26 @@ SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/
 LDLIBS   += $(ROOT_DIR)/libmist/$(MCU_FAMILY)/libmistmiddleware.a
+
+#libota
+ifneq ($(LIBOTA_CONFIG),"")
+    ifneq ("$(wildcard libota/updater.h)","")
+        $(info libota found and included)
+        ifeq ("$(INCLUDE_BOOTLOADER)", "1")
+	          INCLUDES += -I$(ROOT_DIR)/libota/
+	          LDLIBS += $(ROOT_DIR)/libota/$(MCU_FAMILY)/libota.a
+            CFLAGS += -DINCLUDE_OTA
+        else
+            ifneq ($(MAKECMDGOALS),clean)
+                $(error "ERROR: ota enabled and included but bootloader missing")
+            endif
+        endif
+    else
+	      ifneq ($(MAKECMDGOALS),clean)
+            $(error "ERROR: libota enabled but not found")
+        endif
+    endif
+endif
 
 #beatsack
 ifneq ($(LIBBEAT_CONFIG),"")
