@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [UNRELEASED]
 
+## [0.5.1] - 2021-06-22
+
+### Changed
+- Increase outgoing data size to 200 (2 fragments), CRC appended when frags > 1.
+
+### Fixed
+- Same sensor data getting passed to control modules multiple times (dynamic rules).
+
 ## [0.5.0] - 2021-04-27
 
 ### Added
