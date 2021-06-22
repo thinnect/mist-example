@@ -76,7 +76,7 @@ make <PLAFTORM_NAME> INCLUDE_BEATSTACK=1
 
 # Thinnect OTA (libota)
 
-The example application can be optionally built with the Thinnect mesh network
+The example application can be optionally built with the Thinnect mesh update
 layer. The library needs to be obtained separately. The library bundle should
 include a header `updater.h` and the static library `libota.a` for a given
 architecture. These need to be stored as:
