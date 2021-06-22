@@ -6,7 +6,7 @@ PROJECT_NAME            ?= mistexample
 
 VERSION_MAJOR           ?= 1
 VERSION_MINOR           ?= 0
-VERSION_PATCH           ?= 0
+VERSION_PATCH           ?= 1
 VERSION_DEVEL           ?= "-dev"
 
 # Include some optional configuration when requested
@@ -109,13 +109,13 @@ SOURCES += main.c
 
 SOURCES += dummy_node_coordinates.c
 
-MIST_LIGHT_CONTROL ?= 1
+MIST_LIGHT_CONTROL ?= 0
 ifneq ($(MIST_LIGHT_CONTROL),0)
   CFLAGS += -DEXAMPLE_MIST_LIGHT_CONTROL
   SOURCES += mist_mod_lighting.c
 endif
 
-MIST_MOVEMENT ?= 1
+MIST_MOVEMENT ?= 0
 ifneq ($(MIST_MOVEMENT),0)
   CFLAGS += -DEXAMPLE_MIST_MOVEMENT
   SOURCES += mist_mod_movement.c
@@ -131,6 +131,18 @@ MIST_LUX ?= 0
 ifneq ($(MIST_LUX),0)
   CFLAGS += -DEXAMPLE_MIST_LUX
   SOURCES += mist_mod_lux.c
+endif
+
+EXAMPLE_MIST_ARRAY_PAR ?= 0
+ifneq ($(EXAMPLE_MIST_ARRAY_PAR),0)
+  CFLAGS += -DEXAMPLE_MIST_ARRAY_PAR
+  SOURCES += mist_mod_array.c
+endif
+
+EXAMPLE_MIST_ARRAY_SEQ ?= 0
+ifneq ($(EXAMPLE_MIST_ARRAY_SEQ),0)
+  CFLAGS += -DEXAMPLE_MIST_ARRAY_SEQ
+  SOURCES += mist_mod_array.c
 endif
 
 # FreeRTOS

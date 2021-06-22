@@ -10,6 +10,7 @@
 #include "dt_types.h"
 #include "MLE.h"
 #include "MLD.h"
+#include "MLI.h"
 
 #include "platform.h"
 
@@ -81,8 +82,15 @@ static bool get_timestamp_seconds (uint8_t idx, const uint8_t data[], uint16_t l
 }
 
 
+/**
+ * Look for light-sensor target value under the input object.
+ * @param p_value - memory for storing the light-sensor value.
+ * @param data - data buffer.
+ * @param len_data - length of the data in the buffer.
+ * @return true when found and value stored in p_value.
+ */
 static bool get_target_lightsensor_value (
-    int32_t * p_lux,
+    int32_t * p_value,
     const uint8_t data[], uint16_t len_data)
 {
 	ml_object_t object; // Generic helper object
@@ -108,13 +116,21 @@ static bool get_target_lightsensor_value (
 	{
 		return false;
 	}
-	*p_lux = object.value;
+	*p_value = object.value;
 	return true;
 }
 
 
+/**
+ * Look for light-sensor value in the included data.
+ * @param p_value - memory for storing the light-sensor value.
+ * @param p_timestamp - memory for storing the timestamp of the light-sensor value.
+ * @param data - data buffer.
+ * @param len_data - length of the data in the buffer.
+ * @return true when found and value stored in p_value.
+ */
 static bool get_current_lightsensor_value (
-    int32_t * p_lux, uint32_t * p_timestamp,
+    int32_t * p_value, uint32_t * p_timestamp,
     const uint8_t state_data[], uint16_t len_state_data)
 {
 	ml_object_t object; // Generic helper object
@@ -141,12 +157,80 @@ static bool get_current_lightsensor_value (
 	{
 		return false;
 	}
-	*p_lux = object.value;
+	*p_value = object.value;
 
 	return get_timestamp_seconds(idx_data, state_data, len_state_data, p_timestamp);
 }
 
 
+/**
+ * Look for control values passed with data messages. Like jog-dials sending
+ * color-temperature or override values. These appear in states where permitted
+ * and if available.
+ * @param subtype - the type to look for, dt_output_pct, dt_color_temperature, dt_rgbw etc.
+ * @param p_value - memory for returning the value when found.
+ * @param data - data buffer.
+ * @param len_data - length of the data in the buffer.
+ * @return true when found and value stored in p_value.
+ */
+static bool get_subdata_value (
+    int32_t * p_value,
+	uint32_t subtype,
+    const uint8_t data[], uint16_t len_data)
+{
+	// Find a root data object in the input, don't care what the data itself is,
+	// we care if it has any extra elements under it that we have been asked for.
+	ml_object_t oroot;
+	ml_iterator_t iter;
+	MLI_initialize(&iter, data, len_data);
+	while (0 != MLI_nextWithSubject(&iter, 0, &oroot))
+	{
+		if (dt_data == oroot.type)
+		{
+			ml_object_t osub;
+			if (0 != MLD_findOSV(dt_data, oroot.index, subtype, data, len_data, &osub))
+			{
+				ml_object_t oval;
+				if (MLD_findOS(dt_value, osub.index, data, len_data, &oval)&&(oval.valueIsPresent))
+				{
+					*p_value = oval.value;
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+
+/**
+ * Retrieve the input value when control data received as MIST_ITEM_MOTEXML.
+ * @param p_value - memory for returning the value.
+ * @param data - data buffer.
+ * @param len_data - length of the data in the buffer.
+ * @return true when found and value stored in p_value.
+ */
+static bool get_input_value(int32_t * p_value, uint8_t input[], uint16_t input_length)
+{
+	ml_object_t object;
+	if (MLD_findOS(dt_input, 0, input, input_length, &object))
+	{
+		if ((MLD_findOS(dt_value, object.index, input, input_length, &object))
+			&&(object.valueIsPresent))
+		{
+			*p_value = object.value;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+/**
+ * Set the control value of the simulated luminaire.
+ * @param value - desired control value.
+ */
 static void set_value (int32_t value)
 {
 	if(value > 100)
@@ -175,7 +259,19 @@ static void set_value (int32_t value)
 }
 
 
-static mist_error_t light_control(
+/**
+ * Example implementation of a light control function.
+ * @param itype         - type of input, can be complex MoteXML data,
+ *                        an int32 or NULL for reading current state into output.
+ * @param input         - action function input, according to itype, NULL for read.
+ * @param input_length  - length of the input data.
+ * @param otype         - type of returned output, can be comlex MoteXML data or and int32.
+ * @param output        - buffer for data output.
+ * @param output_size   - size of the output array.
+ * @param output_length - length of the data stored in the output array by the called function.
+ * @return MIST_SUCCESS when call successful and otype value has been set.
+ */
+static mist_error_t light_control (
             mist_item_type_t   itype, void * input,  uint16_t input_length,
             mist_item_type_t * otype, void * output, uint16_t output_size, uint16_t * output_length)
 {
@@ -227,10 +323,56 @@ static mist_error_t light_control(
 				        + LUX_LC_PID_KD*derivative);
 			}
 		}
-		else // It could also be some other complex control type not implemented here yet
+		else
 		{
-			warn1("light_control itype %d", (int)itype);
-			return MIST_FAIL;
+			// A case with many control options, probably hardware/platform
+			// dependent in practice. In this example we try to parse some
+			// options and reach at least some control value.
+			bool have_value = false;
+			int32_t value;
+			// Look for default value in input
+			if (get_input_value(&value, input, input_length))
+			{
+				have_value = true;
+			}
+
+			int32_t subval;
+			// Look for pct in received data (buttons and other input devices)
+			if (get_subdata_value(&subval, dt_output_pct, input, input_length))
+			{
+				// We replace the default value with the override
+				value = subval;
+				have_value = true;
+			}
+
+			int32_t color_temp = 0;
+			// Look for colortemp in received data (buttons and other input devices)
+			get_subdata_value(&color_temp, dt_color_temperature, input, input_length);
+
+			uint32_t rgbw = 0; // Transported as int32_t, but we know it's 4 bytes
+			// Look for RGBW in value (buttons and other input devices)
+			if (get_subdata_value((int32_t*)&rgbw, dt_rgbw, input, input_length))
+			{
+				// We replace the default or override value with the white channel,
+				// it is up to the actual implementations to handle multiple inputs,
+				// for example tread the value as overal brightness and the RGBW
+				// information as a form of color temperature.
+				value = (uint8_t)rgbw; // Take the white channel
+				have_value = true;
+			}
+
+			if (have_value)
+			{
+				// For the example we just print the color temp and RGBW values,
+				// it is up to the real implementations use them.
+				info1("CTEMP: %d RGBW: %08X", color_temp, rgbw);
+				set_value(value);
+			}
+			else
+			{
+				err1("no ctrl value");
+				return MIST_FAIL;
+			}
 		}
 	}
 	else // Some unknown type of input ???
@@ -246,7 +388,11 @@ static mist_error_t light_control(
 }
 
 
-bool mist_mod_lighting_init()
+/**
+ * Register a handler for light control with the Mist middleware.
+ * @return true when successfully registered.
+ */
+bool mist_mod_lighting_init ()
 {
 	// Register lighting control
 	m_lighting_module.data_type = dt_light_control;
