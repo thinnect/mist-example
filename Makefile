@@ -4,9 +4,9 @@
 
 PROJECT_NAME            ?= mistexample
 
-VERSION_MAJOR           ?= 1
+VERSION_MAJOR           ?= 2
 VERSION_MINOR           ?= 0
-VERSION_PATCH           ?= 1
+VERSION_PATCH           ?= 0
 VERSION_DEVEL           ?= "-dev"
 
 # Include some optional configuration when requested
@@ -18,7 +18,7 @@ DEFAULT_RADIO_CHANNEL   ?= 12
 
 # Set device address at compile time, will override signature when != 0
 NODE_AM_ADDR            ?= 0
-DEFAULT_PAN_ID          ?= 0xFF
+DEFAULT_PAN_ID          ?= 0x22
 
 #include bootloader
 INCLUDE_BOOTLOADER      ?= 0
@@ -26,8 +26,7 @@ INCLUDE_BOOTLOADER      ?= 0
 # Specify beatstack config, single-hop if not set
 LIBBEAT_CONFIG          ?= ""
 
-
-LIBOTA_CONFIG          = 
+LIBOTA_CONFIG            = 0
 
 #app start
 #if bootloader is included APP_START value is retrived from .board file
@@ -209,8 +208,9 @@ INCLUDES += -I$(NODE_PLATFORM_DIR)/widgets
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_filesystem_setup.c
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_logger_setup.c
 SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_threads_stats.c
-SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_ota_setup.c
-
+ifneq ($(LIBOTA_CONFIG),"")
+    SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_ota_setup.c
+endif
 # device signature
 INCLUDES += -I$(ZOO)/thinnect.device-signature/signature \
             -I$(ZOO)/thinnect.device-signature/area
@@ -272,8 +272,6 @@ SOURCES += $(NODE_PLATFORM_DIR)/silabs/radio_rtos.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargetspi.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargeti2c.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
-
-SOURCES += panic_handler.c
 
 # mist library
 INCLUDES += -I$(ROOT_DIR)/libmist/
@@ -382,9 +380,9 @@ $(BUILD_DIR)/$(PROJECT_NAME).bin: $(BUILD_DIR)/$(PROJECT_NAME).elf
 	$(HIDE_CMD)$(TC_OBJCOPY) --strip-all -O binary "$<" "$@"
 	$(HIDE_CMD)$(HEADEREDIT) -v size -v crc $@
 
-$(BUILD_DIR)/combo.bin: bootloader/tsb2-dev/bootloader.bin $(BUILD_DIR)/$(PROJECT_NAME).bin
+$(BUILD_DIR)/combo.bin: bootloader/wfs201-bootloader.bin $(BUILD_DIR)/$(PROJECT_NAME).bin
 	$(call pInfo,Building combo [$@])
-	srec_cat bootloader/tsb2-dev/bootloader.bin -binary -offset $(BOOTLOADER_START) \
+	srec_cat bootloader/wfs201-bootloader.bin -binary -offset $(BOOTLOADER_START) \
 	                  $(BUILD_DIR)/$(PROJECT_NAME).bin -binary -offset $(APP_START) \
 	                  -o $@ -binary
 	chmod 755 "$@"
