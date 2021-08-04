@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [UNRELEASED]
 
+## [0.5.2] - 2021-07-04
+
+### Fixed
+- Possible memory leak with the outgoing packet buffer for Mist data messages.
+
 ## [0.5.1] - 2021-06-22
 
 ### Changed
