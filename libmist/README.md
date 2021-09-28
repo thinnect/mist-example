@@ -26,8 +26,7 @@ The backoff value can be adjusted for each spontaneous event source with the
 `mist_configure_spontaneous_event_backoff(min, max, step)` function.
 
 The backoff value is calculated with the formula:
-    `backoff = MAX(step * ((1 << events) - 1), backoff_minimum)`
-If more than the maximum time has passed since the last value, events is reset to 0.
-The smallest possible `backoff_minimum` value is 1, the default step value is 10,
-the default maximum value is 120.
-
+    `backoff = MIN(MAX(step * ((1 << events) - 1), minimum), maximum)`
+If more than 2 times the  maximum time has passed since the last value, events
+is reset to 0. The smallest possible `backoff_minimum` value is 1, the default
+step value is 10, the default maximum value is 120.

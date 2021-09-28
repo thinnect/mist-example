@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [UNRELEASED]
 
+## [0.5.3] - 2021-09-28
+
+### Changed
+- Backoff event counter is reset when 2 * maximum has passed.
+
 ## [0.5.2] - 2021-07-04
 
 ### Fixed
