@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [UNRELEASED]
 
+## [0.5.3] - 2021-09-29
+
+### Changed
+- Backoff event counter is reset when 2 * maximum has passed.
+- Simple data formatting now automatically adds YXK timestamp, when available.
+
 ## [0.5.2] - 2021-07-04
 
 ### Fixed
