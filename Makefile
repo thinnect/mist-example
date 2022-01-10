@@ -26,6 +26,9 @@ INCLUDE_BOOTLOADER      ?= 0
 # Specify beatstack config, single-hop if not set
 LIBBEAT_CONFIG          ?= ""
 
+#Specify libbeat config, if not set no ota
+LIBOTA_CONFIG           ?= ""
+
 #app start
 #if bootloader is included APP_START value is retrived from .board file
 #with current bootloader APP_START should be 0x20000
@@ -296,6 +299,22 @@ ifneq ($(LIBBEAT_CONFIG),"")
     else
         ifneq ($(MAKECMDGOALS),clean)
             $(error "ERROR: libbeat enabled but not found")
+        endif
+    endif
+endif
+
+
+#libota
+ifneq ($(LIBOTA_CONFIG),"")
+    ifneq ("$(wildcard libota/$(LIBOTA_CONFIG)/libota.h)","")
+        $(info "libota found and included")
+        INCLUDES += -I$(ROOT_DIR)/libota/$(LIBOTA_CONFIG)/
+        LDLIBS += $(ROOT_DIR)/libota/$(LIBOTA_CONFIG)/$(MCU_FAMILY)/libota.a
+        SOURCES += $(NODE_PLATFORM_DIR)/widgets/basic_rtos_ota_setup.c
+        CFLAGS += -DINCLUDE_OTA
+    else
+        ifneq ($(MAKECMDGOALS),clean)
+            $(error "ERROR: libota enabled but not found")
         endif
     endif
 endif

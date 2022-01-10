@@ -74,6 +74,23 @@ Makefile (or Makefile.private) or set on the command line:
 make <PLAFTORM_NAME> INCLUDE_BEATSTACK=1
 ```
 
+# Thinnect Over-The-Air update (libota)
+
+The example application can be optionally built with the Thinnect OTA included
+
+The library needs to be obtained separately. The library bundle should
+include a header `libota.h` and the static library `libota.a` for a given
+architecture. These need to be stored as:
+```
+$(WORKSPACE_ROOT)/libota/libota.h
+$(WORKSPACE_ROOT)/libota/$(MCU_ARCH)/libota.a
+```
+
+Additionally the most effortless way to initialize ota is to use a pre-included components inside `node-platfrom/widgets` with files `basic_rtos_ota_setup.h` and `basic_rtos_ota_setup.c` and via the function `basic_rtos_ota_setup` with ota managment logic already inside. Otherwise the functions needed for ota are defined in `libota.h` which is included in the separately obtained OTA package.
+
+### Regarding OTA within this project.
+ OTA will be included in the compilation if `LIBOTA_CONFIG` is defined to a directory inside libota e.g `libota/version_1` then `LIBOTA_CONFIG` would be `version_1`
+
 # Setup
 
 This repository relies on several dependencies that are all publically available

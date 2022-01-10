@@ -35,6 +35,10 @@
 #include "basic_rtos_beatstack_timesync.h"
 #endif
 
+#ifdef INCLUDE_OTA
+#include "basic_rtos_ota_setup.h"
+#endif
+
 // emdrv components
 #include "sleep.h"
 #include "dmadrv.h"
@@ -71,6 +75,10 @@ static comms_layer_t * m_radio_comm = NULL;
 
 #ifdef INCLUDE_BEATSTACK
 static comms_layer_t * m_beat_comm = NULL;
+#endif
+
+#ifdef INCLUDE_OTA
+static bool m_feed_watchdog = true;
 #endif
 
 static void radio_start_done (comms_layer_t * comms, comms_status_t status, void * user)
@@ -182,6 +190,15 @@ static void main_loop ()
         osDelay(10000);
         sys_panic("radio");
     }
+
+    #ifdef INCLUDE_OTA
+        #ifdef INCLUDE_BEATSTACK
+            basic_rtos_ota_setup(m_beat_comm, m_radio_comm, true, &m_feed_watchdog);
+        #else
+            basic_rtos_ota_setup(NULL, m_radio_comm, false, &m_feed_watchdog);
+    #endif
+        debug1("OTA initialized");
+    #endif
 
     // Start deviceannouncement application ------------------------------------
     if (0 == announcement_app_init(radio, DEVICE_ANNOUNCEMENT_PERIOD_S))
