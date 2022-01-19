@@ -57,6 +57,11 @@
 #include "log.h"
 #include "sys_panic.h"
 
+
+#ifdef INCLUDE_OTA
+#include "basic_rtos_ota_setup.h"
+#endif
+
 #define USER_FILE_SYS_NR 0
 
 #define DEVICE_ANNOUNCEMENT_PERIOD_S 300
@@ -72,6 +77,8 @@ static comms_layer_t * m_radio_comm = NULL;
 #ifdef INCLUDE_BEATSTACK
 static comms_layer_t * m_beat_comm = NULL;
 #endif
+
+static comms_receiver_t m_receiver_bc_data;
 
 static void radio_start_done (comms_layer_t * comms, comms_status_t status, void * user)
 {
@@ -114,6 +121,7 @@ static comms_layer_t * radio_setup (am_addr_t node_addr, uint8_t eui[IEEE_EUI64_
     {
         err1("!license_rcvr");
     }
+
 #else
     info1("Starting single-hop");
     radio = m_radio_comm;
@@ -183,6 +191,14 @@ static void main_loop ()
         sys_panic("radio");
     }
 
+    #ifdef INCLUDE_OTA
+    bool feed_watchdog = false;
+    #ifdef INCLUDE_BEATSTACK
+        basic_rtos_ota_setup(m_beat_comm, m_radio_comm, true, &feed_watchdog);
+    #else
+        basic_rtos_ota_setup(NULL, m_radio_comm, true, &feed_watchdog);
+    #endif
+    #endif
     // Start deviceannouncement application ------------------------------------
     if (0 == announcement_app_init(radio, DEVICE_ANNOUNCEMENT_PERIOD_S))
     {
