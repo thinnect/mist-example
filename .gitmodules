@@ -17,7 +17,7 @@
 [submodule "zoo/thinnect.mist-comm"]
 	path = zoo/thinnect.mist-comm
 	url = https://github.com/thinnect/mist-comm.git
-	branch = euis
+	branch = refactor-api
 [submodule "zoo/thinnect.device-signature"]
 	path = zoo/thinnect.device-signature
 	url = https://github.com/thinnect/device-signature.git
