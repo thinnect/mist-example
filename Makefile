@@ -281,7 +281,6 @@ SOURCES += $(NODE_PLATFORM_DIR)/common/ident_parameters.c
 INCLUDES += -I$(NODE_PLATFORM_DIR)/include/silabs
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/radio_rtos.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargetspi.c
-SOURCES += $(NODE_PLATFORM_DIR)/silabs/retargeti2c.c
 SOURCES += $(NODE_PLATFORM_DIR)/silabs/watchdog.c
 
 # mist library
