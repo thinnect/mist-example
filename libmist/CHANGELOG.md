@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [UNRELEASED]
 
+## [0.5.5] - 2023-12-10
+### Added
+ - Support for local-only resources.
+### Fixed
+ - Some timestamps missing from data buffer.
+
+## [0.5.4] - 2023-01-26
+### Changed
+ - MIST_MW_FRAGMENT_REQUEST_PERIOD_S is increased from 40 to 120
+ - MIST_MW_FRAGMENT_TIMEOUT_S is increased from 300 to 390
+
 ## [0.5.3] - 2021-09-29
 
 ### Changed

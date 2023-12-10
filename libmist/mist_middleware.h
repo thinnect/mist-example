@@ -95,6 +95,13 @@ void mist_middleware_init(comms_layer_t * radio);
 mist_error_t mist_register_handler(mist_module_t * module);
 
 /**
+ * Configure a registere handler to be only local
+ *
+ * @param local True to make it local, false to make it universal (default).
+ */
+bool mist_configure_handler_local (mist_module_t * module, bool local);
+
+/**
  * Start the middleware - register receivers, start thread.
  *
  * Middleware must be initialized before calling start.
